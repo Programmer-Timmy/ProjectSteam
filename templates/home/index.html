@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block style %}
+    <style>
+        body {
+            background-color: #1b1b1b;
+            color: #c7c7c7;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #66c0f4;
+        }
+        .btn-custom {
+            background-color: #1a73e8;
+            color: #ffffff;
+            border: none;
+        }
+        .btn-custom:hover {
+            background-color: #1259b8;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Navbar -->
+    <div class="container text-center mt-auto">
+        <h1 class="display-4">Welcome to Steam!</h1>
+        <p class="lead">Your gateway to Steam's vast collection of games and more!</p>
+        <a href="{% url 'dashboard-index' %}" class="btn btn-custom btn-lg">Go to Dashboard</a>
+    </div>
+    <div class="mt-auto"></div>
+
+{% endblock %}
