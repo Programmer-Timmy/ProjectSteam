@@ -1,10 +1,8 @@
-import json
-
 from django.db import models
 
 # new games model
 class Games(models.Model):
-    appid = models.IntegerField(primary_key=True)
+    appid = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     release_date = models.DateField()
     english = models.BooleanField()
@@ -20,23 +18,33 @@ class Games(models.Model):
     price = models.FloatField()
 
     def __str__(self):
-        return json.dumps({
-            'appid': self.appid,
-            'name': self.name,
-            'release_date': self.release_date.strftime('%Y-%m-%d'),
-            'english': self.english,
-            'developer': self.developer,
-            'publisher': self.publisher,
-            'required_age': self.required_age,
-            'achievements': self.achievements,
-            'positive_ratings': self.positive_ratings,
-            'negative_ratings': self.negative_ratings,
-            'median_playtime': self.median_playtime,
-            'average_playtime': self.average_playtime,
-            'owners': self.owners,
-            'price': str(self.price),
-        })
+        return f"{self.name} ({self.developer}) - {self.average_playtime} hours average playtime"
 
     class Meta:
         db_table = 'games'
+        managed = False
+
+# game_categories model
+class GameCategories(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    category_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.category_name
+
+    class Meta:
+        db_table = 'game_categories'
+        managed = False
+
+# game_categories_link model
+class GameCategoriesLink(models.Model):
+    id = models.AutoField(primary_key=True)
+    app = models.ForeignKey(Games, on_delete=models.CASCADE, related_name='games', to_field='appid')
+    category = models.ForeignKey(GameCategories, on_delete=models.CASCADE, related_name='game_categories', to_field='category_id')
+
+    def __str__(self):
+        return f"{self.app.name} - {self.category.category_name}"
+
+    class Meta:
+        db_table = 'game_categories_link'
         managed = False
