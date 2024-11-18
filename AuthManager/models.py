@@ -37,11 +37,11 @@ class CustomUserManager(BaseUserManager):
         return user
 
 class CustomUser(AbstractBaseUser):
+    id = models.AutoField(primary_key=True)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    # Explicitly map the 'password' field to the 'password_hash' column
     password = models.CharField(_('password'), max_length=255, db_column='password_hash')
     admin = models.BooleanField(default=False)
 
@@ -52,6 +52,7 @@ class CustomUser(AbstractBaseUser):
 
     def __str__(self):
         return json.dumps({
+            'id': self.id,
             'username': self.username,
             'email': self.email,
             'first_name': self.first_name,
