@@ -1,10 +1,33 @@
 <!-- dashboard.html -->
 {% extends 'base.html' %}
 
-{% block page_title %}{{ 'test' }}{% endblock %}
-
 {% block content %}
     <div class="container">
-        <h1 class="text-center">Welcome to the Dashboard!</h1>
+        <h1 class="text-center">Welcome to your dashboard {{ user.username }}</h1>
+        <div class="row">
+            <div class="col-12">
+                <h2>Top 10 Games</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Game</th>
+                            <th>Price</th>
+                            <th>Average Playtime</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in top_10_games %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ game.name }}</td>
+                                <td>{{ game.price }}</td>
+                                <td>{{ game.average_playtime }} min</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
