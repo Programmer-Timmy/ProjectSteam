@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('steam.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
+    path('auth/', include('AuthManager.urls')),
 ]

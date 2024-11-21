@@ -132,6 +132,24 @@ To add a new page within an app, follow these steps:
 
 ---
 
+## using the authentication system
+
+You can specify what view requires a user to be logged in by using the `@login_required` decorator. This decorator will redirect the user to the login page if they are not logged in.
+
+```python
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def my_view(request):
+    # your view code here
+```
+
+To log a user in, you can use the `login` function from `django.contrib.auth` or just use the login page. 
+
+---
+
+```python
+
 ## Working on the Project
 
 ### Git Workflow
@@ -193,6 +211,23 @@ To create a new app:
 ```bash
 python manage.py startapp <app_name>
 ```
+
+To create a new superuser:
+```bash
+python manage.py createsuperuser
+```
+
+To make and apply migrations:
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+To run tests:
+```bash
+python manage.py test
+```
+
 
 ---
 

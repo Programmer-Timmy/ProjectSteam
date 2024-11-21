@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# custom user model
+AUTH_USER_MODEL = 'AuthManager.CustomUser'
+LOGIN_URL = '/auth/login'
 
 # Application definition
 
@@ -39,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'dashboard.apps.DashboardConfig',
+    'steam.apps.SteamConfig',
+    'AuthManager.apps.AuthmanagerConfig',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +83,16 @@ WSGI_APPLICATION = 'djangoProject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'steam',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',  # Ensure utf8mb4 character set
+            'init_command': "SET default_storage_engine=INNODB",  # Set InnoDB as the default engine
+        },
     }
 }
 
