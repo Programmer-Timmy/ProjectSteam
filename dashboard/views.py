@@ -1,6 +1,7 @@
 from http.client import responses
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.shortcuts import render
 
 from dashboard.models import Games, GameCategoriesLink
@@ -14,22 +15,24 @@ def index(request):
 
     top_10_games = Games.objects.order_by('-average_playtime')[:10]
 
-    games_with_categories = []
+    # Prefetch related categories efficiently
+    top_10_games = top_10_games.prefetch_related(
+        Prefetch(
+            'game_category_links',  # Matches the related_name in GameCategoriesLink
+            queryset=GameCategoriesLink.objects.select_related('category'),
+            to_attr='fetched_categories'
+        )
+    )
+
+    # Add categories to each game and print
     for game in top_10_games:
-        # Use select_related for optimized fetching of related category data
-        categories = GameCategoriesLink.objects.filter(app_id=game).select_related('category')
-        print(categories)
-        category_names = [category.category.category_name for category in categories]
+        # Extract category names from prefetch_related results
+        category_names = [link.category.category_name for link in game.fetched_categories]
 
-        games_with_categories.append({
-            'game': game,
-            'categories': category_names,
-        })
-
-    print(games_with_categories)
+        # Dynamically add categories to the game instance
+        game.categories = category_names
 
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',
         'top_10_games': top_10_games,
-        'games_with_categories': games_with_categories
     })

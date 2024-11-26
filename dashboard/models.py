@@ -33,18 +33,30 @@ class GameCategories(models.Model):
         return self.category_name
 
     class Meta:
+        ordering = ['category_name']
         db_table = 'game_categories'
         managed = False
 
 # game_categories_link model
 class GameCategoriesLink(models.Model):
     id = models.AutoField(primary_key=True)
-    app = models.ForeignKey(Games, on_delete=models.CASCADE, related_name='games', to_field='appid')
-    category = models.ForeignKey(GameCategories, on_delete=models.CASCADE, related_name='game_categories', to_field='category_id')
+    app = models.ForeignKey(
+        Games,
+        on_delete=models.CASCADE,
+        related_name='game_category_links',
+        to_field='appid'
+    )
+    category = models.ForeignKey(
+        GameCategories,
+        on_delete=models.CASCADE,
+        related_name='category_links',
+        to_field='category_id'
+    )
 
     def __str__(self):
         return f"{self.app.name} - {self.category.category_name}"
 
     class Meta:
+        ordering = ['category__category_name']
         db_table = 'game_categories_link'
         managed = False
