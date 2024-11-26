@@ -80,21 +80,17 @@ WSGI_APPLICATION = 'djangoProject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'steam',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',  # Ensure utf8mb4 character set
-            'init_command': "SET default_storage_engine=INNODB",  # Set InnoDB as the default engine
-        },
+        'USER': 'postgres',
+        'PASSWORD': 'Postgresdumdums',
+        'HOST': '85.144.230.126',
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
