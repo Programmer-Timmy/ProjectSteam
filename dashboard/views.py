@@ -14,6 +14,14 @@ def index(request):
     # get the top 10 avarage playtime of the games
 
     top_10_games = Games.objects.order_by('-average_playtime')[:10]
+    from django.db.models import F, FloatField
+
+    best_reviewed_games = (
+        Games.objects.annotate(
+            average_rating=F('positive_ratings') / (F('negative_ratings') + 1)  # Prevent division by zero
+        )
+        .order_by('-average_rating')[:10]  # Sort by highest average
+    )
 
     # Prefetch related categories efficiently
     top_10_games = top_10_games.prefetch_related(
@@ -35,4 +43,5 @@ def index(request):
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',
         'top_10_games': top_10_games,
+        'best_reviewed_games': best_reviewed_games
     })
