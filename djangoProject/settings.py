@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'steam.apps.SteamConfig',
     'AuthManager.apps.AuthmanagerConfig',
     'games.apps.GamesConfig',
+    'ajax.apps.AjaxConfig',
 ]
 
 MIDDLEWARE = [
