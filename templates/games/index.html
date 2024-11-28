@@ -34,7 +34,7 @@
                                             </a>
                                             <div class="text-end">
                                                 <small class="d-block text-muted">{{ game.release_date }}</small>
-                                                <span class="text-success fw-bold">{{ game.price }}</span>
+                                                <span class="text-success fw-bold">{% if game.price == 0 %} Free {% else %}{{ game.price }}{% endif %}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -53,9 +53,7 @@
     <script>
         const search = document.getElementById('search');
         search.addEventListener('input', function() {
-            console.log(search.value);
             const searchValue = search.value;
-            {#add csrf token#}
             $.ajax({
                 url: "{% url 'get_games' %}",
                 type: "get",
@@ -64,7 +62,6 @@
                     search: searchValue
                 },
                 success: function(data) {
-                    console.log(data);
                     $('#games').html(data);
                 }
             });

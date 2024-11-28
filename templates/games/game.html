@@ -17,7 +17,7 @@
                         <dd class="col-sm-8">{{ game.release_date }}</dd>
 
                         <dt class="col-sm-4">Price</dt>
-                        <dd class="col-sm-8">{{ game.price }}</dd>
+                        <dd class="col-sm-8">{% if game.price == 0 %} Free {% else %}{{ game.price }}{% endif %}</dd>
 
                         <dt class="col-sm-4">Developer</dt>
                         <dd class="col-sm-8">{{ game.developer }}</dd>
