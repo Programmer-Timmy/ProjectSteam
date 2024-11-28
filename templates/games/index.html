@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1 class="text-center">Games</h1>
+    <div class="row">
+        <div class="col-12">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Game</th>
+                        <th>Price</th>
+                        <th>Average Playtime</th>
+                        <th>Categorie</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for game in games %}
+                    <tr>
+                        <td><a href="{% url 'game' game_id=game.appid %}">{{ game.name }}</a></td>
+                        <td>{{ game.price }}</td>
+                        <td>{{ game.average_playtime }} min</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

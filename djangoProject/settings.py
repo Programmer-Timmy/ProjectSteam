@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
     'steam.apps.SteamConfig',
     'AuthManager.apps.AuthmanagerConfig',
+    'games.apps.GamesConfig',
 ]
 
 MIDDLEWARE = [

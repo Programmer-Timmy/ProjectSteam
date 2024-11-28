@@ -23,4 +23,5 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),
     path('auth/', include('AuthManager.urls')),
+    path('games/', include('games.urls')),
 ]

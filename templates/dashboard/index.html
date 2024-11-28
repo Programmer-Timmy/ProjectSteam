@@ -44,11 +44,10 @@
                         {% for game in top_10_games %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ game.name }}</td>
+                                <td><a href="{% url 'game' game_id=game.appid %}">{{ game.name }}</a></td>
                                 <td>{{ game.price }}</td>
                                 <td>{{ game.average_playtime }} min</td>
                                 <td>
-                                    {# Only display the first 3 categories #}
                                     {% for category in game.categories|slice:":3" %}
                                         {{ category }}{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
@@ -75,7 +74,7 @@
                         {% for game in best_reviewed_games %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ game.name }}</td>
+                                <td><a href="{% url 'game' game_id=game.appid %}">{{ game.name }}</a></td>
                                 <td>{{ game.price }}</td>
                                 <td>{{ game.average_rating }}</td>
                             </tr>

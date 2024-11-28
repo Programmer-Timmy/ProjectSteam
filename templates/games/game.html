@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">{{ game.name }}</h1>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-lg border-light">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Game Details</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Released</dt>
+                        <dd class="col-sm-8">{{ game.release_date }}</dd>
+
+                        <dt class="col-sm-4">Price</dt>
+                        <dd class="col-sm-8">{{ game.price }}</dd>
+
+                        <dt class="col-sm-4">Developer</dt>
+                        <dd class="col-sm-8">{{ game.developer }}</dd>
+
+                        <dt class="col-sm-4">Publisher</dt>
+                        <dd class="col-sm-8">{{ game.publisher }}</dd>
+
+                        <dt class="col-sm-4">Categories</dt>
+                        <dd class="col-sm-8">{{ game.categories|join:', ' }}</dd>
+
+                        <dt class="col-sm-4">Genres</dt>
+                        <dd class="col-sm-8">{{ game.genres|join:', ' }}</dd>
+
+                        <dt class="col-sm-4">Tags</dt>
+                        <dd class="col-sm-8">{{ game.tags|join:', ' }}</dd>
+
+                        <dt class="col-sm-4">Achievements</dt>
+                        <dd class="col-sm-8">{{ game.achievements }}</dd>
+
+                        <dt class="col-sm-4">Positive Reviews</dt>
+                        <dd class="col-sm-8">{{ game.positive_ratings }}</dd>
+
+                        <dt class="col-sm-4">Negative Reviews</dt>
+                        <dd class="col-sm-8">{{ game.negative_ratings }}</dd>
+
+                        <dt class="col-sm-4">Average Playtime</dt>
+                        <dd class="col-sm-8">{{ game.average_playtime }} min</dd>
+
+                        <dt class="col-sm-4">Owning</dt>
+                        <dd class="col-sm-8">{{ game.owners }}</dd>
+                    </dl>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'games-index' %}" class="btn btn-outline-primary">Back to Game List</a>
+<!--                        if logged in show back to dashboard-->
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard-index' %}" class="btn btn-primary">Back to Dashboard</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
