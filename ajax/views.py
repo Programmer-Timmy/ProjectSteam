@@ -13,7 +13,6 @@ def get_games(request):
     order_by = request.GET.get('order_by', 'id')  # Default order_by column
     order_dir = request.GET.get('order', 'asc')  # Default order direction
     limit = request.GET.get('limit', '30')  # Default limit
-    print(game_name, order_by, order_dir, limit)
     try:
         # Ensure limit is an integer
         limit = int(limit)
@@ -24,7 +23,7 @@ def get_games(request):
     if order_dir not in ['asc', 'desc']:
         return JsonResponse({'error': 'Invalid order direction'}, status=400)
 
-    # Dynamically build the query
+        # Dynamically build the query
     query = Q()  # Start with an empty query
     if game_name:
         query &= Q(name__icontains=game_name)  # Add search filter if provided
@@ -36,5 +35,6 @@ def get_games(request):
     # Execute the query
     games = Games.objects.filter(query).order_by(ordering)[:limit]
 
-    # Render the response
     return render(request, 'ajax/get_games.html', {'games': games})
+
+# Render the response

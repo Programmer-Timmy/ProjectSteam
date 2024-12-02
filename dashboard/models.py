@@ -16,6 +16,10 @@ class Games(models.Model):
     average_playtime = models.IntegerField()
     owners = models.CharField(max_length=255)
     price = models.FloatField()
+    description = models.TextField()
+    short_description = models.TextField()
+    steam_image = models.URLField(max_length=255)
+    tiny_image = models.URLField(max_length=255)
 
     def __str__(self):
         return f"{self.name} ({self.developer}) - {self.average_playtime} hours average playtime"

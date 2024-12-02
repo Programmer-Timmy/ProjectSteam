@@ -9,13 +9,12 @@ from dashboard.models import Games
 # Create your views here.
 def index(request):
     # get all games from the database
-    games = Games.objects.all()[0:30]
+    games = Games.objects.all().order_by('appid')[0:30]
 
     return render(request, 'games/index.html', {
         'page_title': 'Games',
         'games': games
     })
-
 
 def fetch_steam_data(appid):
     """
@@ -29,33 +28,32 @@ def fetch_steam_data(appid):
         data = response.json()
 
         if data:
-            return data[str(appid)]['data']
+            try:
+                return data[str(appid)]['data']
+            except KeyError:
+                return None
 
         return None
     except (requests.RequestException, ValueError):
         return None
 
-
 def game(request, game_id):
     # Get the game from the database
     game = get_object_or_404(Games, appid=game_id)
 
-    # Fetch Steam API data using the game's name
+    game.steam_url = f"https://store.steampowered.com/app/{game.appid}"
 
-    steam_data = fetch_steam_data(game.appid)
-    # nice print
-    print(json.dumps(steam_data, indent=4))
-    if steam_data:
-        game.steam_image = steam_data.get('header_image', steam_data.get('tiny_image'))  # Game image
-        game.steam_url = f"https://store.steampowered.com/app/{game.appid}"
-        game.description = steam_data.get('detailed_description')  # Game description
-        game.short_description = steam_data.get('short_description')  # Game short description
-    else:
-        game.steam_image = None
-        game.steam_url = None
+    # cache the game's image, description, and short description because of the API rate limit
+    if not game.steam_image or not game.description or not game.short_description:
+        # Fetch Steam API data using the game's name
+        steam_data = fetch_steam_data(game.appid)
+        if steam_data:
+            game.steam_image = steam_data['header_image']
+            game.description = steam_data.get('detailed_description', '')
+            game.short_description = steam_data.get('short_description', '')
 
-    print(game.steam_image)
-    print(game.steam_url)
+            # Update the game with the new data
+            game.save()
 
     # Organize categories
     game.categories = [link.category.category_name for link in game.game_category_links.all()]
