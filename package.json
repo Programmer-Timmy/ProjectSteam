@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "bootstrap": "^5.3.3",
+    "sass": "^1.81.0"
+  },
+    "scripts": {
+        "watch:sass": "sass --watch djangoProject/static/scss/:djangoProject/static/css/",
+        "compile:sass": "sass djangoProject/static/scss/style.scss djangoProject/static/css/style.css --style compressed"
+    }
+}

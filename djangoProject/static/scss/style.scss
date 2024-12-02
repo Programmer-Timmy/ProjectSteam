@@ -1,0 +1,31 @@
+@import '../../../node_modules/bootstrap/scss/bootstrap';
+
+/* Steam-Like Light Theme */
+[data-bs-theme="light"] {
+  --bs-body-bg: #f4f4f4; /* Light gray background */
+  --bs-body-color: #2c2f3d; /* Dark text for contrast */
+  --bs-navbar-bg: #22262b; /* Softer light gray for the navbar */
+  --bs-navbar-color: #dcdfe1; /* Dark text for the navbar */
+  --bs-btn-secondary-bg: #a1a5b1; /* Muted button background */
+  --bs-btn-secondary-border: #8c8f9a; /* Slightly darker border */
+
+    nav {
+        background-color: var(--bs-navbar-bg);
+        color: var(--bs-navbar-color);
+    }
+}
+
+/* Steam-Like Dark Theme */
+[data-bs-theme="dark"] {
+  --bs-body-bg: #1b1f23; /* Dark background */
+  --bs-body-color: #dcdfe1; /* Light text for readability */
+  --bs-navbar-bg: #22262b; /* Neutral dark gray for the navbar */
+  --bs-navbar-color: #dcdfe1; /* Light text for the navbar */
+  --bs-btn-secondary-bg: #3e4a57; /* Muted, dark button background */
+  --bs-btn-secondary-border: #2e3a45; /* Darker border */
+
+  nav {
+    background-color: var(--bs-navbar-bg);
+    color: var(--bs-navbar-color);
+  }
+}

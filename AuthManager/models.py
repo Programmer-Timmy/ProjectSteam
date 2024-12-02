@@ -44,6 +44,8 @@ class CustomUser(AbstractBaseUser):
     last_name = models.CharField(max_length=255)
     password = models.CharField(_('password'), max_length=255, db_column='password_hash')
     admin = models.BooleanField(default=False)
+    last_login = models.DateTimeField(null=True, blank=True)
+    dark_mode = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
@@ -58,6 +60,8 @@ class CustomUser(AbstractBaseUser):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'admin': self.admin,
+            'last_login': self.last_login,
+            'dark_mode': self.dark_mode
         })
 
     def set_password(self, raw_password):
@@ -73,3 +77,4 @@ class CustomUser(AbstractBaseUser):
 
     class Meta:
         db_table = 'users'
+        managed = False

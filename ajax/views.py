@@ -37,4 +37,13 @@ def get_games(request):
 
     return render(request, 'ajax/get_games.html', {'games': games})
 
-# Render the response
+def dark_mode(request):
+    if not request.method == 'POST':
+        return HttpResponse('')
+
+    dark_mode = request.POST.get('darkmode', False)
+    user = request.user
+    user.dark_mode = dark_mode == 'true'
+    user.save()
+
+    return JsonResponse({'dark_mode': user.dark_mode})
