@@ -60,3 +60,110 @@ class GameCategoriesLink(models.Model):
         ordering = ['category__category_name']
         db_table = 'game_categories_link'
         managed = False
+
+
+class GameGenres(models.Model):
+    genre_id = models.AutoField(primary_key=True)
+    genre_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.genre_name
+
+    class Meta:
+        ordering = ['genre_name']
+        db_table = 'game_genres'
+        managed = False
+
+class GameGenresLink(models.Model):
+    id = models.AutoField(primary_key=True)
+    app = models.ForeignKey(
+        Games,
+        on_delete=models.CASCADE,
+        related_name='game_genre_links',
+        to_field='appid'
+    )
+    genre = models.ForeignKey(
+        GameGenres,
+        on_delete=models.CASCADE,
+        related_name='genre_links',
+        to_field='genre_id'
+    )
+
+    def __str__(self):
+        return f"{self.app.name} - {self.genre.genre_name}"
+
+    class Meta:
+        ordering = ['genre__genre_name']
+        db_table = 'game_genres_link'
+        managed = False
+
+class GamePlatforms(models.Model):
+    platform_id = models.AutoField(primary_key=True)
+    platform_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.platform_name
+
+    class Meta:
+        ordering = ['platform_name']
+        db_table = 'game_platforms'
+        managed = False
+
+class GamePlatformsLinks(models.Model):
+    id = models.AutoField(primary_key=True)
+    app = models.ForeignKey(
+        Games,
+        on_delete=models.CASCADE,
+        related_name='game_platform_links',
+        to_field='appid'
+    )
+    platform = models.ForeignKey(
+        GamePlatforms,
+        on_delete=models.CASCADE,
+        related_name='platform_links',
+        to_field='platform_id'
+    )
+
+    def __str__(self):
+        return f"{self.app.name} - {self.platform.platform_name}"
+
+    class Meta:
+        ordering = ['platform__platform_name']
+        db_table = 'game_platforms_link'
+        managed = False
+
+class GameSteamspyTags(models.Model):
+    tag_id = models.AutoField(primary_key=True)
+    tag_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.tag_name
+
+    class Meta:
+        ordering = ['tag_name']
+        db_table = 'game_steamspy_tags'
+        managed = False
+
+
+class GameSteamspyTagsLink(models.Model):
+    id = models.AutoField(primary_key=True)
+    app = models.ForeignKey(
+        Games,
+        on_delete=models.CASCADE,
+        related_name='game_tag_links',
+        to_field='appid'
+    )
+    tag = models.ForeignKey(
+        GameSteamspyTags,
+        on_delete=models.CASCADE,
+        related_name='tag_links',
+        to_field='tag_id'
+    )
+
+    def __str__(self):
+        return f"{self.app.name} - {self.tag.tag_name}"
+
+    class Meta:
+        ordering = ['tag__tag_name']
+        db_table = 'game_steamspy_tags_link'
+        managed = False
