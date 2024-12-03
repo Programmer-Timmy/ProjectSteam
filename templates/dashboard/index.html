@@ -20,69 +20,110 @@
                 </p>
 
                 <p>
-                    Am i bored? No, I'm just... busy. Yeah, busy. I'm not playing games, I'm working on the factory. The factory must grow.
+                    Am i bored? No, I'm just... busy. Yeah, busy. I'm not playing games, I'm working on the factory. The
+                    factory must grow.
                 </p>
             </div>
         </div>
 
 
         <div class="row">
-            <div class="col-12 col-lg-6">
-                <h2>Top 10 Games played</h2>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Game</th>
-                            <th>Price</th>
-                            <th>Average Playtime</th>
-                            <th>Categorie</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for game in top_10_games %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td><a href="{% url 'game' game_id=game.appid %}">{{ game.name }}</a></td>
-                                <td>{{ game.price }}</td>
-                                <td>{{ game.average_playtime }} min</td>
-                                <td>
-                                    {% for category in game.categories|slice:":3" %}
-                                        {{ category }}{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+            <div class="col-12">
+                <h2>Most played games</h2>
+                <div class="row flex-nowrap overflow-auto">
+
+                    {% for game in top_10_games %}
+                        <div class="col-4">
+                            <div class="card mb-4 shadow-sm h-100">
+                                {% if game.steam_image %}
+                                    <div class="img-wrapper position-relative">
+                                        <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                           style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                        <img src="{{ game.steam_image }}" class="card-img-top" alt="{{ game.name }}">
+                                    </div>
+                                {% else %}
+                                    <p class="text-center text-muted">No image available.</p>
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+
+                                    <h5 class="card-title">{{ game.name }}</h5>
+                                    {% if game.short_description %}
+                                        <p class="card-text text-truncate"
+                                           style="max-height: 60px; overflow: hidden;">
+                                            {{ game.short_description }}
+                                        </p>
+                                    {% else %}
+                                        <p class="card-text text-truncate"
+                                           style="max-height: 60px; overflow: hidden;">
+                                            No description available.
+                                        </p>
+                                    {% endif %}
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'game' game.appid %}"
+                                               class="btn btn-sm btn-primary">
+                                                View
+                                            </a>
+                                            <div class="text-end">
+                                                <small class="d-block text-muted">{{ game.release_date }}</small>
+                                                <span class="text-success fw-bold">{% if game.price == 0 %}
+                                                    Free {% else %}{{ game.price }}{% endif %}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
                 </div>
-            </div>
-            <div class="col-12 col-lg-6">
-                <h2>Top 10 best reviewed games</h2>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead class="table-dark">
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Price</th>
-                            <th>Average Rating</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                <div class="col-12 mt-5">
+                    <h2>Best reviewed games</h2>
+                    <div class="row flex-nowrap overflow-auto">
+
                         {% for game in best_reviewed_games %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td><a href="{% url 'game' game_id=game.appid %}">{{ game.name }}</a></td>
-                                <td>{{ game.price }}</td>
-                                <td>{{ game.average_rating }}</td>
-                            </tr>
+                            <div class="col-4">
+                                <div class="card mb-4 shadow-sm h-100">
+                                    {% if game.steam_image %}
+                                        <div class="img-wrapper position-relative">
+                                            <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center" style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                            <img src="{{ game.steam_image }}" class="card-img-top" alt="{{ game.name }}">
+                                        </div>
+                                    {% else %}
+                                        <p class="text-center text-muted">No image available.</p>
+                                    {% endif %}
+                                    <div class="card-body d-flex flex-column">
+
+                                        <h5 class="card-title">{{ game.name }}</h5>
+                                        {% if game.short_description %}
+                                            <p class="card-text text-truncate"
+                                               style="max-height: 60px; overflow: hidden;">
+                                                {{ game.short_description }}
+                                            </p>
+                                        {% else %}
+                                            <p class="card-text text-truncate"
+                                               style="max-height: 60px; overflow: hidden;">
+                                                No description available.
+                                            </p>
+                                        {% endif %}
+                                        <div class="mt-auto">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="{% url 'game' game.appid %}"
+                                                   class="btn btn-sm btn-primary">
+                                                    View
+                                                </a>
+                                                <div class="text-end">
+                                                    <small class="d-block text-muted">{{ game.release_date }}</small>
+                                                    <span class="text-success fw-bold">{% if game.price == 0 %}
+                                                        Free {% else %}{{ game.price }}{% endif %}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         {% endfor %}
-                        </tbody>
-                    </table>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 {% endblock %}
