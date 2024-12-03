@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from django.shortcuts import render
 
-from dashboard.models import Games, GameCategoriesLink
+from dashboard.models import Games, GameCategoriesLink, UserGames
 
 
 # Create your views here.
@@ -32,16 +32,12 @@ def index(request):
         )
     )
 
-    # Add categories to each game and print
-    for game in top_10_games:
-        # Extract category names from prefetch_related results
-        category_names = [link.category.category_name for link in game.fetched_categories]
-
-        # Dynamically add categories to the game instance
-        game.categories = category_names
+    last_played = UserGames.objects.filter(user=request.user).order_by('-last_played')[:10]
+    print(last_played)
 
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',
         'top_10_games': top_10_games,
-        'best_reviewed_games': best_reviewed_games
+        'best_reviewed_games': best_reviewed_games,
+        'last_played_games': last_played
     })

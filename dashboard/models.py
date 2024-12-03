@@ -171,3 +171,28 @@ class GameSteamspyTagsLink(models.Model):
         ordering = ['tag__tag_name']
         db_table = 'game_steamspy_tags_link'
         managed = False
+
+class UserGames(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        'AuthManager.CustomUser',
+        on_delete=models.CASCADE,
+        related_name='user_games',
+        to_field='id'
+    )
+    app = models.ForeignKey(
+        Games,
+        on_delete=models.CASCADE,
+        related_name='user_games',
+        to_field='appid'
+    )
+    last_played = models.DateField()
+    hours_played = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.user.username} - {self.app.name}"
+
+    class Meta:
+        ordering = ['user', 'app']
+        db_table = 'user_games'
+        managed = False
