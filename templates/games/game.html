@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container my-5">
+    <!-- Hero Section -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="bg-dark text-white p-5 rounded shadow-lg">
+                <h1 class="display-4">{{ game.name }}</h1>
+                <p class="lead">{{ game.short_description }}</p>
+                <a href="{{game.steam_url}}" target="_blank" class="btn btn-lg btn-primary shadow">Play Now</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Details Section -->
+    <div class="row my-5">
+        <!-- Game Cover -->
+        <div class="col-md-4 text-center">
+            <img src="{{ game.steam_image }}" alt="{{ game.name }} Cover" class="img-fluid rounded shadow">
+            <p class="mt-3">
+                {% if game.price == 0 %}
+                <span class="badge bg-success">Free</span>
+                {% else %}
+                <span class="badge bg-warning">${{ game.price }}</span>
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Game Info -->
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4>About the Game</h4>
+                </div>
+                <div class="card-body">
+<!--                    use the html chars in the string-->
+                    <p>{{ game.description | safe }}</p>
+
+                    <hr>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Release Date</dt>
+                        <dd class="col-sm-8">{{ game.release_date }}</dd>
+
+                        <dt class="col-sm-4">Developer</dt>
+                        <dd class="col-sm-8">{{ game.developer }}</dd>
+
+                        <dt class="col-sm-4">Publisher</dt>
+                        <dd class="col-sm-8">{{ game.publisher }}</dd>
+
+                        <dt class="col-sm-4">Platforms</dt>
+                        <dd class="col-sm-8">
+                            {% for platform in game.platforms %}
+                            <span class="badge bg-secondary me-1">{{ platform }}</span>
+                            {% endfor %}
+                        </dd>
+
+                        <dt class="col-sm-4">Genres</dt>
+                        <dd class="col-sm-8">
+                            {% for genre in game.genres %}
+                            <span class="badge bg-secondary me-1">{{ genre }}</span>
+                            {% endfor %}
+                        </dd>
+
+                        <dt class="col-sm-4">Tags</dt>
+                        <dd class="col-sm-8">
+                            {% for tag in game.steamspy_tags %}
+                            <span class="badge bg-secondary me-1">{{ tag }}</span>
+                            {% endfor %}
+                        </dd>
+                    </dl>
+
+                    <hr>
+
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <h5>Positive Reviews</h5>
+                            <p>{{ game.positive_ratings }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Negative Reviews</h5>
+                            <p>{{ game.negative_ratings }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h5>Achievements</h5>
+                            <p>{{ game.achievements }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center mt-5">
+        <a href="{% url 'games-index' %}" class="btn btn-outline-primary">Back to Game List</a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'dashboard-index' %}" class="btn btn-primary">Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -2,60 +2,198 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container">
+    <div class="px-md-5 px-3">
         <h1 class="text-center">Welcome to your dashboard {{ user.username }}</h1>
-        <div class="row">
-            <div class="col-12">
-                <h2>Top 10 Games</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Game</th>
-                            <th>Price</th>
-                            <th>Average Playtime</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for game in top_10_games %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ game.name }}</td>
-                                <td>{{ game.price }}</td>
-                                <td>{{ game.average_playtime }} min</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-{#        show the games whit categories#}
-        <div class="row">
-            <div class="col-12">
-                <h2>Games by Category</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Game</th>
-                            <th>Price</th>
-                            <th>Average Playtime</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for game in games_with_categories %}
-                            {% for category in game.categories %}
+        <div class="alert alert-warning text-center" role="alert">
+            <div>
+                <h2>Note from Cosmic Pioneer</h2>
+                <p>
+                    The top 10 games are here, but the rest? Well... let’s just say my FICSIT factory’s power grid
+                    decided to take a vacation, and I've been busy fixing it.
+                    Between optimizing conveyor belts and making sure I don’t accidentally blow up another part of the
+                    factory, the rest of the project is still "under construction."
+                </p>
+                <p>
+                    This *FICSIT-grade* project comes with a live warranty: operational as long as I can avoid another
+                    meltdown or get distracted by yet another resource shortage. Expect delays if I get caught in a
+                    spiderweb of conveyor belts or run out of materials while trying to automate this thing.
+                </p>
 
-                                <tr>
-                                    <td>{{ category }}</td>
-                                    <td>{{ game.game.name }}</td>
-                                    <td>{{ game.game.price }}</td>
-                                    <td>{{ game.game.average_playtime }} min</td>
-                                </tr>
-                            {% endfor %}
-                        {% endfor %}
-                </table>
+                <p>
+                    Am i bored? No, I'm just... busy. Yeah, busy. I'm not playing games, I'm working on the factory. The
+                    factory must grow.
+                </p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% if user.opt_out %}
+            <div class="alert alert-danger text-center" role="alert">
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <h2 class="alert-heading">Opted Out</h2>
+                </div>
+                    <div class="col-4 text-end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    You have opted out of the dashboard. Your activity data will not contribute to the dashboard and you
+                    won't be able to see personalized statistics.
+
+                    If you change your mind, you can update your settings.
+                </p>
+                <a href="{% url 'account:settings' %}" class="btn btn-primary">
+                    Update Settings
+                </a>
+            </div>
+        {% endif %}
+
+
+        {% if not user.opt_out %}
+            <div class="row">
+            <div class="col-12">
+                <h2>Last played games</h2>
+                <div class="row flex-nowrap overflow-auto">
+                    {% for game in last_played_games %}
+                        <div class="col-2">
+                            <div class="card mb-4 shadow-sm h-100">
+                                {% if game.app.steam_image %}
+                                    <img src="{{ game.app.steam_image }}" class="card-img-top" style="max-width: 500px;"
+                                         alt="{{ game.app.name }}">
+                                {% else %}
+                                    <p class="text-center text-muted">No image available.</p>
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ game.app.name }}</h5>
+                                    {#                                    last played date#}
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        Last played: {{ game.last_played }}
+                                    </p>
+                                    {#                                    total hours#}
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                    </p>
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'game' game.app.appid %}"
+                                               class="btn btn-sm btn-primary">
+                                                View
+                                            </a>
+                                            <div class="text-end">
+                                                <span class="text-success fw-bold">
+                                                    Total Playtime: {{ game.hours_played }} hours
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        <div class="col-12 mt-5">
+            <h2>Most played games</h2>
+            <div class="row flex-nowrap overflow-auto">
+
+                {% for game in top_10_games %}
+                    <div class="col-4">
+                        <div class="card mb-4 shadow-sm h-100">
+                            {% if game.steam_image %}
+                                <div class="img-wrapper position-relative">
+                                    <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                       style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                    <img src="{{ game.steam_image }}" class="card-img-top"
+                                         alt="{{ game.name }}">
+                                </div>
+                            {% else %}
+                                <p class="text-center text-muted">No image available.</p>
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+
+                                <h5 class="card-title">{{ game.name }}</h5>
+                                {% if game.short_description %}
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        {{ game.short_description }}
+                                    </p>
+                                {% else %}
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        No description available.
+                                    </p>
+                                {% endif %}
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'game' game.appid %}"
+                                           class="btn btn-sm btn-primary">
+                                            View
+                                        </a>
+                                        <div class="text-end">
+                                            <small class="d-block text-muted">{{ game.release_date }}</small>
+                                            <span class="text-success fw-bold">{% if game.price == 0 %}
+                                                Free {% else %}{{ game.price }}{% endif %}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+            <div class="col-12 mt-5">
+                <h2>Best reviewed games</h2>
+                <div class="row flex-nowrap overflow-auto">
+
+                    {% for game in best_reviewed_games %}
+                        <div class="col-4">
+                            <div class="card mb-4 shadow-sm h-100">
+                                {% if game.steam_image %}
+                                    <div class="img-wrapper position-relative">
+                                        <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                           style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                        <img src="{{ game.steam_image }}" class="card-img-top"
+                                             alt="{{ game.name }}">
+                                    </div>
+                                {% else %}
+                                    <p class="text-center text-muted">No image available.</p>
+                                {% endif %}
+                                <div class="card-body d-flex flex-column">
+
+                                    <h5 class="card-title">{{ game.name }}</h5>
+                                    {% if game.short_description %}
+                                        <p class="card-text text-truncate"
+                                           style="max-height: 60px; overflow: hidden;">
+                                            {{ game.short_description }}
+                                        </p>
+                                    {% else %}
+                                        <p class="card-text text-truncate"
+                                           style="max-height: 60px; overflow: hidden;">
+                                            No description available.
+                                        </p>
+                                    {% endif %}
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'game' game.appid %}"
+                                               class="btn btn-sm btn-primary">
+                                                View
+                                            </a>
+                                            <div class="text-end">
+                                                <small class="d-block text-muted">{{ game.release_date }}</small>
+                                                <span class="text-success fw-bold">{% if game.price == 0 %}
+                                                    Free {% else %}{{ game.price }}{% endif %}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
-    </div>
 {% endblock %}

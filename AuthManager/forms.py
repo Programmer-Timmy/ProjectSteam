@@ -10,13 +10,13 @@ class CustomUserCreationForm(UserCreationForm):
     last_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    opt_out = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
-
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
+        fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'opt_out')
 
     def save(self, commit=True):
         user = super().save(commit=False)
