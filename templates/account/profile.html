@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
     <div class="container-fluid p-0 shadow-sm">
         <!-- Profile Header -->
@@ -10,9 +11,9 @@
                     <div class="col-auto">
                         <img src="
                         {% if user.profile_picture %}
-                                {{ user.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
+                            {{ user.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                         {% else %}
-                                /media/profile_pictures/default-profile.png
+                            /media/profile_pictures/default-profile.png
                         {% endif %}
                         "
                              alt="{{ user.username }}"
@@ -22,15 +23,15 @@
                     <div class="col">
                         <h1 class="fw-bold">{{ user.username }}</h1>
                         <p class="mb-0">Member Since: {{ user.created_at|date:"F j, Y" }}</p>
+                        <p class="text-muted">Status: {{ user.public_profile|yesno:"Public,Private" }}</p>
                     </div>
-                    <!-- Profile Status -->
-                    <div class="col-auto text-end d-flex flex-column">
+                    <!-- Profile Status Badge -->
+                    <div class="col-auto text-end">
                         {% if user.public_profile %}
                             <span class="badge bg-success">Public Profile</span>
                         {% else %}
                             <span class="badge bg-danger">Private Profile</span>
                         {% endif %}
-                        <a href="{% url 'account:edit' %}" class="btn btn-outline-light btn-lg mt-2">Edit Profile</a>
                     </div>
                 </div>
             </div>
@@ -58,46 +59,41 @@
                                 </div>
                             {% endfor %}
                         {% else %}
-                            <p class="text-muted">You haven't played any games recently.</p>
+                            <p class="text-muted">No recent game activity to display.</p>
                         {% endif %}
                     </div>
                 </div>
             </div>
-            {% if user.show_friends %}
-                <!-- Friends Section -->
+
+            <!-- Friends Section -->
+            {% if user.show_friends and friends %}
                 <div class="col-12">
                     <div class="card bg-light border-0 p-3 text-dark shadow">
                         <h3>Friends</h3>
                         <div class="row g-3">
-                            {% if friends %}
-                                {% for friend in friends %}
-                                    {% if friend.friend.public_profile %}
-                                        <div class="col-md-4 col-lg-2">
-                                            <div class="card shadow-md h-100 border-0 bg-dark text-white">
-                                                <img src="
+                            {% for friend in friends %}
+                                {% if friend.friend.public_profile %}
+                                    <div class="col-md-4 col-lg-2">
+                                        <div class="card shadow-md h-100 border-0 bg-dark text-white">
+                                            <img src="
                                                 {% if friend.friend.profile_picture %}
                                                     {{ friend.friend.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                                                 {% else %}
                                                     /media/profile_pictures/default-profile.png
                                                 {% endif %}
                                                 "
-                                                     class="rounded-top img-fluid" alt="{{ friend.username }}">
-                                                <div class="card-body">
-                                                    <h5 class="card-title">{{ friend.friend.username }}</h5>
-                                                    <p class="card-text">Member
-                                                        Since: {{ friend.friend.created_at|date:"F j, Y" }}</p>
-
-                                                    <a href="{% url 'account:profile' friend.friend.id %}"
-                                                       class="btn btn-outline-light">View Profile</a>
-                                                </div>
+                                                 class="rounded-top img-fluid" alt="{{ friend.username }}">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ friend.friend.username }}</h5>
+                                                <p class="card-text">Member
+                                                    Since: {{ friend.friend.created_at|date:"F j, Y" }}</p>
+                                                <a href="{% url 'account:profile' friend.friend.id %}"
+                                                   class="btn btn-outline-light">View Profile</a>
                                             </div>
                                         </div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <p class="mb-0">You don't have any friends yet. socialize!</p>
-                                <p class="mb-0">This won't be displayed on your public profile</p>
-                            {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
