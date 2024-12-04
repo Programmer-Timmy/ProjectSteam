@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+
+        <h1 class="text-center mb-4">Delete Account</h1>
+
+        {% if success_message %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> 
+                {{ success_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% else %}
+
+        <!-- Delete Account Form -->
+        <form method="POST" class="form">
+            {% csrf_token %}
+
+            <div class="form-group text-center mb-4">
+                <p class="lead">Are you sure you want to delete your account?</p>
+                <p class="text-danger">This action is irreversible and will permanently remove your account.</p>
+            </div>
+
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-danger">Delete Account</button>
+                <a href="{% url 'account:settings' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+{% endblock %}
