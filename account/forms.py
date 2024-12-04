@@ -47,3 +47,56 @@ class ProfileEditForm(forms.ModelForm):
                     self.instance.profile_picture.delete()
 
         return cleaned_data
+
+class UserSettingsForm(forms.ModelForm):
+    opt_out = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    first_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = CustomUser
+        fields = ('opt_out', 'first_name', 'last_name', 'email', 'username')
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+        return user
+
+class UserChangePasswordForm(forms.ModelForm):
+    old_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    new_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = CustomUser
+        fields = ('old_password', 'new_password', 'confirm_password')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        old_password = cleaned_data.get('old_password')
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+
+
+        user = self.instance
+        # Check if the old password is correct
+        if old_password and not user.check_password(old_password):
+            raise ValidationError("Old password is incorrect.")
+
+        # Check if new password matches the confirmation
+        if new_password and confirm_password:
+            if new_password != confirm_password:
+                raise ValidationError("New password and confirmation do not match.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Hash and set the new password
+        user.set_password(self.cleaned_data['new_password'])
+        if commit:
+            user.save()
+        return user
