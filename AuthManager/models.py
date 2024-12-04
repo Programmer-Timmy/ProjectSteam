@@ -41,6 +41,7 @@ class CustomUser(AbstractBaseUser):
     show_friends = models.BooleanField(default=True)
     public_profile = models.BooleanField(default=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    opt_out = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 

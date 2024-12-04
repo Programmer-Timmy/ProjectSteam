@@ -24,10 +24,34 @@
                     factory must grow.
                 </p>
             </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        {% if user.opt_out %}
+            <div class="alert alert-danger text-center" role="alert">
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <h2 class="alert-heading">Opted Out</h2>
+                </div>
+                    <div class="col-4 text-end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    You have opted out of the dashboard. Your activity data will not contribute to the dashboard and you
+                    won't be able to see personalized statistics.
+
+                    If you change your mind, you can update your settings.
+                </p>
+                <a href="{% url 'account:settings' %}" class="btn btn-primary">
+                    Update Settings
+                </a>
+            </div>
+        {% endif %}
 
 
-        <div class="row">
+        {% if not user.opt_out %}
+            <div class="row">
             <div class="col-12">
                 <h2>Last played games</h2>
                 <div class="row flex-nowrap overflow-auto">
@@ -35,7 +59,7 @@
                         <div class="col-2">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if game.app.steam_image %}
-                                    <img src="{{ game.app.steam_image }}" class="card-img-top"
+                                    <img src="{{ game.app.steam_image }}" class="card-img-top" style="max-width: 500px;"
                                          alt="{{ game.app.name }}">
                                 {% else %}
                                     <p class="text-center text-muted">No image available.</p>
@@ -70,11 +94,62 @@
                     {% endfor %}
                 </div>
             </div>
+        {% endif %}
+        <div class="col-12 mt-5">
+            <h2>Most played games</h2>
+            <div class="row flex-nowrap overflow-auto">
+
+                {% for game in top_10_games %}
+                    <div class="col-4">
+                        <div class="card mb-4 shadow-sm h-100">
+                            {% if game.steam_image %}
+                                <div class="img-wrapper position-relative">
+                                    <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                       style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                    <img src="{{ game.steam_image }}" class="card-img-top"
+                                         alt="{{ game.name }}">
+                                </div>
+                            {% else %}
+                                <p class="text-center text-muted">No image available.</p>
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+
+                                <h5 class="card-title">{{ game.name }}</h5>
+                                {% if game.short_description %}
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        {{ game.short_description }}
+                                    </p>
+                                {% else %}
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        No description available.
+                                    </p>
+                                {% endif %}
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'game' game.appid %}"
+                                           class="btn btn-sm btn-primary">
+                                            View
+                                        </a>
+                                        <div class="text-end">
+                                            <small class="d-block text-muted">{{ game.release_date }}</small>
+                                            <span class="text-success fw-bold">{% if game.price == 0 %}
+                                                Free {% else %}{{ game.price }}{% endif %}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
             <div class="col-12 mt-5">
-                <h2>Most played games</h2>
+                <h2>Best reviewed games</h2>
                 <div class="row flex-nowrap overflow-auto">
 
-                    {% for game in top_10_games %}
+                    {% for game in best_reviewed_games %}
                         <div class="col-4">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if game.steam_image %}
@@ -118,57 +193,7 @@
                             </div>
                         </div>
                     {% endfor %}
-
-                </div>
-                <div class="col-12 mt-5">
-                    <h2>Best reviewed games</h2>
-                    <div class="row flex-nowrap overflow-auto">
-
-                        {% for game in best_reviewed_games %}
-                            <div class="col-4">
-                                <div class="card mb-4 shadow-sm h-100">
-                                    {% if game.steam_image %}
-                                        <div class="img-wrapper position-relative">
-                                            <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
-                                               style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
-                                            <img src="{{ game.steam_image }}" class="card-img-top"
-                                                 alt="{{ game.name }}">
-                                        </div>
-                                    {% else %}
-                                        <p class="text-center text-muted">No image available.</p>
-                                    {% endif %}
-                                    <div class="card-body d-flex flex-column">
-
-                                        <h5 class="card-title">{{ game.name }}</h5>
-                                        {% if game.short_description %}
-                                            <p class="card-text text-truncate"
-                                               style="max-height: 60px; overflow: hidden;">
-                                                {{ game.short_description }}
-                                            </p>
-                                        {% else %}
-                                            <p class="card-text text-truncate"
-                                               style="max-height: 60px; overflow: hidden;">
-                                                No description available.
-                                            </p>
-                                        {% endif %}
-                                        <div class="mt-auto">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <a href="{% url 'game' game.appid %}"
-                                                   class="btn btn-sm btn-primary">
-                                                    View
-                                                </a>
-                                                <div class="text-end">
-                                                    <small class="d-block text-muted">{{ game.release_date }}</small>
-                                                    <span class="text-success fw-bold">{% if game.price == 0 %}
-                                                        Free {% else %}{{ game.price }}{% endif %}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
                 </div>
             </div>
+        </div>
 {% endblock %}

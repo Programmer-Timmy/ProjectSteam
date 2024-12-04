@@ -39,7 +39,7 @@
                             <li><a class="dropdown-item" href="{% url 'register' %}">Register</a></li>
                         {% else %}
                             <li><a class="dropdown-item" href="{% url 'account:profile' %}">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
+                            <li><a class="dropdown-item" href="{% url 'account:settings' %}">Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                         {% endif %}

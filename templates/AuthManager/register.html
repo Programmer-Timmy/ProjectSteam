@@ -86,6 +86,16 @@
                 </div>
             {% endif %}
 
+            <div class="form-check mb-3">
+                {{ form.opt_out }}
+                <label class="form-check-label" for="public_profile">
+                    Opt out of sharing your data for dashboard analytics
+                </label>
+                <small class="form-text text-muted">
+                    By opting out, your activity data will not contribute to the dashboard statistics.
+                </small>
+            </div>
+
             <button type="submit" class="btn btn-primary w-100">Register</button>
         </form>
         <div class="text-center mt-3">
