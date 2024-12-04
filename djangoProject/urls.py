@@ -25,4 +25,5 @@ urlpatterns = [
     path('auth/', include('AuthManager.urls')),
     path('games/', include('games.urls')),
     path('ajax/', include('ajax.urls')),
+    path('account/', include('account.urls')),
 ]

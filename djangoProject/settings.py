@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'AuthManager.apps.AuthmanagerConfig',
     'games.apps.GamesConfig',
     'ajax.apps.AjaxConfig',
+    'account.apps.AccountConfig',
 ]
 
 MIDDLEWARE = [
