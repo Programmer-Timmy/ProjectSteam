@@ -42,7 +42,7 @@ class CustomUser(AbstractBaseUser):
     public_profile = models.BooleanField(default=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     opt_out = models.BooleanField(default=False)
-
+    is_online = models.BooleanField(default=False)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'

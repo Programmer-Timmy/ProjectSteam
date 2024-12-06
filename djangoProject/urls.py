@@ -28,6 +28,7 @@ urlpatterns = [
     path('games/', include('games.urls')),
     path('ajax/', include('ajax.urls')),
     path('account/', include('account.urls')),
+    path('raspberry/', include('raspberry.urls')),
 ]
 
 if settings.DEBUG:
