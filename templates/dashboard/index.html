@@ -1,5 +1,117 @@
 <!-- dashboard.html -->
 {% extends 'base.html' %}
+{% block style %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        totalPlayedData = false;
+        weeklyPlayedData = false;
+
+        // Load the Google Charts library
+        google.charts.load('current', {'packages': ['corechart']});
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts(skip = false) {
+            const year = new Date().getFullYear();
+            const startWeek = 1;
+            const endWeek = 52;
+
+            if (skip) {
+                drawTotalPlayedChart(totalPlayedData);
+                drawWeeklyPlayedChart(weeklyPlayedData);
+                return;
+            }
+
+            fetch('/dashboard/data?year=' + year + '&startWeek=' + startWeek + '&endWeek=' + endWeek)
+                .then(response => response.json())
+                .then(data => {
+                    totalPlayedData = data.totalPlayed;
+                    weeklyPlayedData = data.weeklyPlayed;
+                    drawTotalPlayedChart(data.totalPlayed);
+                    drawWeeklyPlayedChart(data.weeklyPlayed);
+                });
+        }
+
+        // Pie Chart: Total Played Per Game
+        function drawTotalPlayedChart(totalPlayedData) {
+            const chartData = [['Game', 'Total Time']];
+            totalPlayedData.forEach(item => {
+                chartData.push([item.game_name + ' (' + item.total_time + ' hours)', item.total_time]);
+            });
+
+            const data = google.visualization.arrayToDataTable(chartData);
+            const options = {
+                title: 'Total Played Time Per Game',
+                pieHole: 0.4,
+                backgroundColor: '#f8f9fa',
+            };
+            const chart = new google.visualization.PieChart(document.getElementById('total-played-chart'));
+            chart.draw(data, options);
+        }
+
+        // Bar Chart: Played Per Game Per Week
+        function drawWeeklyPlayedChart(playedPerWeekData) {
+            console.log(playedPerWeekData);
+            const header = ['Week'];
+            playedPerWeekData.forEach(item => {
+                if (!header.includes(item.game_name)) {
+                    header.push(item.game_name);
+                }
+            });
+
+            const weeklyData = {};
+
+            playedPerWeekData.forEach(item => {
+                const week = 'Week ' + item.week;
+                if (!weeklyData[week]) {
+                    weeklyData[week + ''] = {};
+                }
+                if (!weeklyData[week][item.game_name]) {
+                    weeklyData[week][item.game_name] = 0;
+                }
+                weeklyData[week][item.game_name] += Math.round(item.total_time);
+            });
+
+            const chartData = [header];
+
+            Object.keys(weeklyData).forEach(week => {
+                const row = [week]; // Start with the week
+                header.slice(1).forEach(game => {
+                    row.push(weeklyData[week][game] || 0); // Add total time for the game or 0 if not played
+                });
+                chartData.push(row);
+            });
+
+            const data = google.visualization.arrayToDataTable(chartData);
+            const options = {
+                title: 'Played Time Per Game Per Week',
+                xAxis: {title: 'Week'},
+                yAxis: {title: 'Total Time'},
+                hAxis: {
+                    title: 'Week',
+                    titleTextStyle: {
+                        color: '#333'
+                    }
+                },
+                vAxis: {
+                    minValue: 0,
+                    title: 'Total Time',
+                    titleTextStyle: {
+                        color: '#333'
+                    }
+                },
+                legend: {position: 'top', maxLines: 3, textStyle: {color: 'black'}},
+                isStacked: true,
+                backgroundColor: '#f8f9fa',
+            };
+            const chart = new google.visualization.ColumnChart(document.getElementById('weekly-played-chart'));
+            chart.draw(data, options);
+        }
+
+        window.addEventListener('resize', function () {
+            drawCharts(true);
+        });
+    </script>
+{% endblock %}
 
 {% block content %}
     <div class="px-md-5 px-3">
@@ -28,11 +140,11 @@
         </div>
         {% if user.opt_out %}
             <div class="alert alert-danger text-center" role="alert">
-            <div class="row">
-                <div class="col-4"></div>
-                <div class="col-4">
-                    <h2 class="alert-heading">Opted Out</h2>
-                </div>
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Opted Out</h2>
+                    </div>
                     <div class="col-4 text-end">
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -52,6 +164,25 @@
 
         {% if not user.opt_out %}
             <div class="row">
+            <div class="col-6">
+                <div class="card shadow mb-4 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Total Playtime Per Game (2024)</h5>
+                        <div id="total-played-chart" style="height: 300px;"></div>
+                        <p class="text-center text-muted">Total playtime per game in hours</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-6">
+                <div class="card shadow mb-4 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Weekly Playtime Per Game (2024 - Week 1 to 52)</h5>
+                        <div id="weekly-played-chart" style="height: 300px;"></div>
+                        <p class="text-center text-muted">Weekly playtime per game in hours</p>
+                    </div>
+                </div>
+            </div>
             <div class="col-12">
                 <h2>Last played games</h2>
                 <div class="row flex-nowrap overflow-auto">
