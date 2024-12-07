@@ -1,0 +1,146 @@
+<!-- Modal -->
+<div class="modal fade" id="dashboardFilters" tabindex="-1" aria-labelledby="dashboardFiltersLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dashboardFiltersLabel">Select Year and Week Range</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="weekRangeForm">
+                    <div class="mb-3">
+                        <label for="year" class="form-label">Year</label>
+                        <select class="form-select" id="year" name="year" required>
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3 col">
+                            <label for="startWeek" class="form-label">Start Week</label>
+                            <select class="form-select" id="startWeek" name="startWeek" required>
+                                <!-- Week options will be populated by JavaScript -->
+                            </select>
+                            <div class="invalid-feedback">
+                                Start week cannot be greater than end week.
+                            </div>
+                        </div>
+                        <div class="mb-3 col">
+                            <label for="endWeek" class="form-label">End Week</label>
+                            <select class="form-select" id="endWeek" name="endWeek" required>
+                                <!-- Week options will be populated by JavaScript -->
+                            </select>
+                            <div class="invalid-feedback">
+                                End week cannot be less than start week.
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script to populate the dropdowns and handle form submission -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const yearDropdown = document.getElementById('year');
+        const startWeekDropdown = document.getElementById('startWeek');
+        const endWeekDropdown = document.getElementById('endWeek');
+
+        // Populate year dropdown with the current year and the previous/next years if needed
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear - 5; i <= currentYear; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            yearDropdown.appendChild(option);
+        }
+        yearDropdown.value = currentYear; // Set current year as default
+
+        // Populate week dropdowns (1-53)
+        const weeksInYear = new Date(currentYear, 11, 28).getWeek();
+        for (let i = 1; i <= weeksInYear; i++) {
+            const optionStart = document.createElement('option');
+            optionStart.value = i;
+            optionStart.textContent = i;
+            startWeekDropdown.appendChild(optionStart);
+
+            const optionEnd = document.createElement('option');
+            optionEnd.value = i;
+            optionEnd.textContent = i;
+            endWeekDropdown.appendChild(optionEnd);
+        }
+        
+        // Set current week as the default for start and end weeks
+        startWeekDropdown.value = Math.ceil((new Date().getDate() - new Date(new Date().getFullYear(), 0, 1).getDate() + 1) / 7);
+        endWeekDropdown.value = weeksInYear;
+
+        document.getElementById('weekRangeForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const year = yearDropdown.value;
+            const startWeek = startWeekDropdown.value;
+            const endWeek = endWeekDropdown.value;
+
+            // Reset validation classes
+            yearDropdown.classList.remove('is-invalid');
+            startWeekDropdown.classList.remove('is-invalid');
+
+            if (!year || !startWeek || !endWeek) {
+                $('#endWeek').addClass('is-invalid');
+                return;
+            }
+
+            if (parseInt(startWeek) > parseInt(endWeek)) {
+                $('#startWeek').addClass('is-invalid');
+                return;
+            }
+
+            // Log the selected values (or use them for further processing)
+            drawCharts(year, startWeek, endWeek);
+
+            // Close the modal after submission (optional)
+            $('#dashboardFilters').modal('hide');
+        });
+
+        {#  on year input change the week dropdown#}
+        yearDropdown.addEventListener('change', function () {
+            const selectedYear = yearDropdown.value;
+            const selectedStartWeek = startWeekDropdown.value;
+            const selectedEndWeek = endWeekDropdown.value;
+
+            // Clear existing options
+            startWeekDropdown.innerHTML = '';
+            endWeekDropdown.innerHTML = '';
+
+            // Populate week dropdowns (1-53)
+            const weeksInYear = new Date(selectedYear, 11, 28).getWeek();
+
+            for (let i = 1; i <= weeksInYear; i++) {
+                const optionStart = document.createElement('option');
+                optionStart.value = i;
+                optionStart.textContent = i;
+                startWeekDropdown.appendChild(optionStart);
+
+                const optionEnd = document.createElement('option');
+                optionEnd.value = i;
+                optionEnd.textContent = i;
+                endWeekDropdown.appendChild(optionEnd);
+            }
+
+            // Set the selected week as the default for start and end weeks
+            startWeekDropdown.value = selectedStartWeek;
+            endWeekDropdown.value = weeksInYear;
+        });
+    });
+
+    // Function to get the week number of the year
+    Date.prototype.getWeek = function () {
+        const date = new Date(this.getTime());
+        date.setHours(0, 0, 0, 0);
+        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+        const week1 = new Date(date.getFullYear(), 0, 4);
+        return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    };
+</script>
