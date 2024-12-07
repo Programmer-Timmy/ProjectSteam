@@ -1,23 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Status</title>
-</head>
-<body>
-    <h1>User Status</h1>
-    
-    <!-- Display user information -->
-    <p>User: {{ user.username }}</p> <!-- Replace 'username' with the appropriate field from your model -->
+{% extends 'base.html'%}
 
-    <!-- Display online status -->
+{% block content %}
+<h1>User Status</h1>
+    <p>User: {{ user.username }}</p> 
     <p>Status: 
         {% if is_online %}
             <span style="color: green;">Online</span>
         {% else %}
             <span style="color: red;">Offline</span>
         {% endif %}
-    </p>
-</body>
-</html>
+    
+{% endblock %}

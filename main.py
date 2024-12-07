@@ -1,15 +1,34 @@
 
-import machine
-import time
 import utime
 import neopixel
-
+import machine
+import sys
+import time
+from machine import Pin
 # Define pins
 trigger = machine.Pin(14, machine.Pin.OUT)
 echo = machine.Pin(15, machine.Pin.IN)
 sensor = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_DOWN)
 np = neopixel.NeoPixel(machine.Pin(16), 8)
+url = "http://localhost:8000/raspberry/set-online-status/"
+access_token = ""
 
+
+def test_uart_over_usb():
+    led = Pin("LED", Pin.OUT)
+    uart = sys.stdout
+
+    while True:
+        # Send data over USB
+        uart.write('Hello from Pico via USB\n')
+        print("Sent: Hello from Pico via USB")
+
+        if uart in sys.stdin:  # Check if data is available
+            data = sys.stdin.read(1)
+            print(f"Received: {data}")
+            if data == 'm':
+                led.toggle()
+        time.sleep(1)
 
 def neopixel():
     red = [255, 0, 0]
@@ -18,29 +37,29 @@ def neopixel():
     minimal_distance = 50
     optimal_distance = 80
 
-    #roep de functie measure_distance aan om de afstand op te halen
+    # roep de functie measure_distance aan om de afstand op te halen
     distance = measure_distance()
     if distance < minimal_distance:
         # berekening voor de hoeveelheid lampen die aangezet moeten worden
-        number_off_lit_leds = int((distance // (minimal_distance/8)))
+        number_off_lit_leds = int((distance // (minimal_distance / 8)))
         set_neopixel_color(red, number_off_lit_leds)
     elif minimal_distance <= distance < optimal_distance:
         # berekening voor de hoeveelheid lampen die aangezet moeten worden
-        number_of_lit_leds = int(8- ((distance-minimal_distance) // ((optimal_distance-minimal_distance)/8)))
+        number_of_lit_leds = int(8 - ((distance - minimal_distance) // ((optimal_distance - minimal_distance) / 8)))
         set_neopixel_color(orange, number_of_lit_leds)
     else:
         set_neopixel_color(green, 0)
 
 
-
 def set_neopixel_color(color, number_of_leds):
-    for i in range(0, 8-number_of_leds):
+    for i in range(0, 8 - number_of_leds):
         np[i] = color
         np.write()
 
-    for j in range(8-number_of_leds, 8):
-        np[j] = [0,0,0]
+    for j in range(8 - number_of_leds, 8):
+        np[j] = [0, 0, 0]
         np.write()
+
 
 def measure_distance():
     # Send a 10us pulse to trigger the sensor
@@ -63,8 +82,12 @@ def measure_distance():
     return distance
 
 
+
+
+
 while True:
-    neopixel()
+
+    test_uart_over_usb()
     distance = measure_distance()
     print("distance:", distance, "cm")
     utime.sleep(1)
