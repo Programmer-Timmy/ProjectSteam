@@ -51,7 +51,7 @@ def index(request):
 def get_total_played_data(year, user_id):
     total_played_per_game = (
         GameSessions.objects.filter(user_game__user__id=user_id, start_timestamp__year=year)
-        .values(game_name=F('user_game__app__name'))
+        .values(game_name=F('user_game__app__name'), app_id=F('user_game__app__appid'))
         .annotate(total_time=Cast(Sum('total_time'), output_field=models.FloatField()))
     )
 
@@ -67,7 +67,7 @@ def get_weekly_played_data(year, start_week, end_week, user_id):
             start_timestamp__week__lte=end_week
         )
         .annotate(week=ExtractWeek('start_timestamp'))
-        .values(week=F('week'), game_name=F('user_game__app__name'))
+        .values(week=F('week'), game_name=F('user_game__app__name'), app_id=F('user_game__app__appid'))
         .annotate(total_time=Cast(Sum('total_time'), output_field=models.FloatField()))
         .order_by('week', 'game_name')
     )
