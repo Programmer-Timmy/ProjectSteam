@@ -5,13 +5,13 @@ from django.shortcuts import render, redirect
 from AuthManager.models import CustomUser
 from account.forms import ProfileEditForm, UserSettingsForm, UserChangePasswordForm
 from account.models import Friend
-from dashboard.models import UserGames
+from dashboard.models import UserGames, GameSessions
 
 
 # Create your views here.
 @login_required
 def index(request):
-    last_played_games = UserGames.objects.filter(user=request.user).order_by('-last_played')[:3]
+    last_played_games = GameSessions.objects.filter(user_game__user=request.user).order_by('-start_timestamp')[:3]
     friends = Friend.objects.filter(user=request.user, friend__public_profile=True)
     return render(request, 'account/index.html', {
         'page_title': 'Profile',
@@ -39,7 +39,7 @@ def profile(request, user_id):
         })
 
     friends = Friend.objects.filter(user=user, friend__public_profile=True)
-    last_played_games = UserGames.objects.filter(user=user).order_by('-last_played')[:3]
+    last_played_games = GameSessions.objects.filter(user_game__user=user).order_by('-start_timestamp')[:3]
 
     return render(request, 'account/profile.html', {
         'page_title': f'{user.username}\'s Profile',

@@ -38,8 +38,11 @@ def index(request):
         )
     )
 
-    last_played = UserGames.objects.filter(user=request.user).order_by('-last_played')[:10]
-    print(last_played)
+    # calulate total time played per game
+
+    # get the total of all the games time and set it to a new field called total
+    last_played = GameSessions.objects.filter(user_game__user=request.user
+                                              ).order_by('-start_timestamp')[:6]
 
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',

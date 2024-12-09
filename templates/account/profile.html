@@ -2,102 +2,103 @@
 {% load static %}
 
 {% block content %}
-    <div class="container-fluid p-0 shadow-sm">
-        <!-- Profile Header -->
-        <div class="bg-dark text-white py-5 position-relative">
-            <div class="container position-relative z-1">
-                <div class="row align-items-center">
-                    <!-- Profile Picture -->
-                    <div class="col-auto">
-                        <img src="
+<div class="container-fluid p-0 shadow-sm">
+    <!-- Profile Header -->
+    <div class="bg-dark text-white py-5 position-relative">
+        <div class="container position-relative z-1">
+            <div class="row align-items-center">
+                <!-- Profile Picture -->
+                <div class="col-auto">
+                    <img src="
                         {% if user.profile_picture %}
                             {{ user.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                         {% else %}
                             /media/profile_pictures/default-profile.png
                         {% endif %}
                         "
-                             alt="{{ user.username }}"
-                             class="rounded-circle border border-light shadow" width="120" height="120">
-                    </div>
-                    <!-- Profile Info -->
-                    <div class="col">
-                        <h1 class="fw-bold">{{ user.username }}</h1>
-                        <p class="mb-0">Member Since: {{ user.created_at|date:"F j, Y" }}</p>
-                        <p class="text-muted">Status: {{ user.public_profile|yesno:"Public,Private" }}</p>
-                    </div>
-                    <!-- Profile Status Badge -->
-                    <div class="col-auto text-end">
-                        {% if user.public_profile %}
-                            <span class="badge bg-success">Public Profile</span>
-                        {% else %}
-                            <span class="badge bg-danger">Private Profile</span>
-                        {% endif %}
-                    </div>
+                         alt="{{ user.username }}"
+                         class="rounded-circle border border-light shadow" width="120" height="120">
+                </div>
+                <!-- Profile Info -->
+                <div class="col">
+                    <h1 class="fw-bold">{{ user.username }}</h1>
+                    <p class="mb-0">Member Since: {{ user.created_at|date:"F j, Y" }}</p>
+                    <p class="text-muted">Status: {{ user.public_profile|yesno:"Public,Private" }}</p>
+                </div>
+                <!-- Profile Status Badge -->
+                <div class="col-auto text-end">
+                    {% if user.public_profile %}
+                    <span class="badge bg-success">Public Profile</span>
+                    {% else %}
+                    <span class="badge bg-danger">Private Profile</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="container my-4">
-        <div class="row g-4">
-            <!-- Last Played Games Section -->
-            <div class="col-12">
-                <div class="card bg-light border-0 p-3 text-dark shadow">
-                    <h3>Last Played Games</h3>
-                    <div class="row g-3">
-                        {% if last_played_games %}
-                            {% for game in last_played_games %}
-                                <div class="col-md-6 col-lg-4">
-                                    <div class="card shadow-md h-100 border-0 bg-dark text-white">
-                                        <img src="{{ game.app.steam_image }}" class="rounded-top img-fluid"
-                                             alt="{{ game.app.name }}">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ game.app.name }}</h5>
-                                            <p class="card-text">Played {{ game.last_played|date:"F j, Y" }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted">No recent game activity to display.</p>
-                        {% endif %}
+<div class="container my-4">
+    <div class="row g-4">
+        <!-- Last Played Games Section -->
+        <div class="col-12">
+            <div class="card bg-light border-0 p-3 text-dark shadow">
+                <h3>Last Played Games</h3>
+                <div class="row g-3">
+                    {% if last_played_games %}
+                    {% for game in last_played_games %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-md h-100 border-0 bg-dark text-white">
+                            <img src="{{ game.user_game.app.steam_image }}" class="rounded-top img-fluid"
+                                 alt="{{ game.user_game.app.name }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ game.user_game.app.name }}</h5>
+                                <p class="card-text">Played {{ game.user_game.last_played|date:"F j, Y" }}</p>
+                                <p class="card-text">Playtime: {{ game.total_time }} hours</p>
+                            </div>
+                        </div>
                     </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">No recent game activity to display.</p>
+                    {% endif %}
                 </div>
             </div>
+        </div>
 
-            <!-- Friends Section -->
-            {% if user.show_friends and friends %}
-                <div class="col-12">
-                    <div class="card bg-light border-0 p-3 text-dark shadow">
-                        <h3>Friends</h3>
-                        <div class="row g-3">
-                            {% for friend in friends %}
-                                {% if friend.friend.public_profile %}
-                                    <div class="col-md-4 col-lg-2">
-                                        <div class="card shadow-md h-100 border-0 bg-dark text-white">
-                                            <img src="
+        <!-- Friends Section -->
+        {% if user.show_friends and friends %}
+        <div class="col-12">
+            <div class="card bg-light border-0 p-3 text-dark shadow">
+                <h3>Friends</h3>
+                <div class="row g-3">
+                    {% for friend in friends %}
+                    {% if friend.friend.public_profile %}
+                    <div class="col-md-4 col-lg-2">
+                        <div class="card shadow-md h-100 border-0 bg-dark text-white">
+                            <img src="
                                                 {% if friend.friend.profile_picture %}
                                                     {{ friend.friend.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                                                 {% else %}
                                                     /media/profile_pictures/default-profile.png
                                                 {% endif %}
                                                 "
-                                                 class="rounded-top img-fluid" alt="{{ friend.username }}">
-                                            <div class="card-body">
-                                                <h5 class="card-title">{{ friend.friend.username }}</h5>
-                                                <p class="card-text">Member
-                                                    Since: {{ friend.friend.created_at|date:"F j, Y" }}</p>
-                                                <a href="{% url 'account:profile' friend.friend.id %}"
-                                                   class="btn btn-outline-light">View Profile</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
+                                 class="rounded-top img-fluid" alt="{{ friend.username }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ friend.friend.username }}</h5>
+                                <p class="card-text">Member
+                                    Since: {{ friend.friend.created_at|date:"F j, Y" }}</p>
+                                <a href="{% url 'account:profile' friend.friend.id %}"
+                                   class="btn btn-outline-light">View Profile</a>
+                            </div>
                         </div>
                     </div>
+                    {% endif %}
+                    {% endfor %}
                 </div>
-            {% endif %}
+            </div>
         </div>
+        {% endif %}
     </div>
+</div>
 {% endblock %}

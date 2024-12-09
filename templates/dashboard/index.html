@@ -309,18 +309,22 @@
                 {% for game in last_played_games %}
                 <div class="col-4 col-xl-2">
                     <div class="card mb-4 shadow-sm h-100">
-                        {% if game.app.steam_image %}
-                        <img src="{{ game.app.steam_image }}" class="card-img-top" style="max-width: 500px;"
+                        {% if game.user_game.app.steam_image %}
+                        <img src="{{ game.user_game.app.steam_image }}" class="card-img-top" style="max-width: 500px;"
                              alt="{{ game.app.name }}">
                         {% else %}
                         <p class="text-center text-muted">No image available.</p>
                         {% endif %}
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ game.app.name }}</h5>
+                            <h5 class="card-title">{{ game.user_game.app.name }}</h5>
                             {# last played date#}
                             <p class="card-text text-truncate"
                                style="max-height: 60px; overflow: hidden;">
-                                Last played: {{ game.last_played }}
+                                {% if game.end_timestamp %}
+                                    {{ game.end_timestamp|date:"F j, Y H:i" }}
+                                {% else %}
+                                <span class="text-success">Ongoing</span>
+                                {% endif %}
                             </p>
                             {# total hours#}
                             <p class="card-text text-truncate"
@@ -328,13 +332,13 @@
                             </p>
                             <div class="mt-auto">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <a href="{% url 'game' game.app.appid %}"
+                                    <a href="{% url 'game' game.user_game.app.appid %}"
                                        class="btn btn-sm btn-primary">
                                         View
                                     </a>
                                     <div class="text-end">
                                                 <span class="text-success fw-bold">
-                                                    Total Playtime: {{ game.hours_played }} hours
+                                                    Played {{ game.total_time }} hours
                                                 </span>
                                     </div>
                                 </div>
@@ -356,7 +360,7 @@
                         {% if game.steam_image %}
                         <div class="img-wrapper position-relative">
                             <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
-                               style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{forloop.counter }}</p>
+                               style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{forloop.counter}}</p>
                             <img src="{{ game.steam_image }}" class="card-img-top"
                                  alt="{{ game.name }}">
                         </div>

@@ -81,11 +81,12 @@
                                 {% for game in last_played_games %}
                                     <div class="col-md-6 col-lg-4">
                                         <div class="card shadow-md h-100 border-0 bg-dark text-white">
-                                            <img src="{{ game.app.steam_image }}" class="rounded-top img-fluid"
-                                                 alt="{{ game.app.name }}">
+                                            <img src="{{ game.user_game.app.steam_image }}" class="rounded-top img-fluid"
+                                                 alt="{{ game.user_game.app.name }}">
                                             <div class="card-body">
-                                                <h5 class="card-title">{{ game.app.name }}</h5>
-                                                <p class="card-text">Played {{ game.last_played|date:"F j, Y" }}</p>
+                                                <h5 class="card-title">{{ game.user_game.app.name }}</h5>
+                                                <p class="card-text">Played {{ game.user_game.last_played|date:"F j, Y" }}</p>
+                                                <p class="card-text">Playtime: {{ game.total_time }} hours</p>
                                             </div>
                                         </div>
                                     </div>
