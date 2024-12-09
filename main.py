@@ -5,30 +5,16 @@ import machine
 import sys
 import time
 from machine import Pin
+
 # Define pins
 trigger = machine.Pin(14, machine.Pin.OUT)
 echo = machine.Pin(15, machine.Pin.IN)
 sensor = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_DOWN)
 np = neopixel.NeoPixel(machine.Pin(16), 8)
 url = "http://localhost:8000/raspberry/set-online-status/"
-access_token = ""
+uart = sys.stdout
 
 
-def test_uart_over_usb():
-    led = Pin("LED", Pin.OUT)
-    uart = sys.stdout
-
-    while True:
-        # Send data over USB
-        uart.write('Hello from Pico via USB\n')
-        print("Sent: Hello from Pico via USB")
-
-        if uart in sys.stdin:  # Check if data is available
-            data = sys.stdin.read(1)
-            print(f"Received: {data}")
-            if data == 'm':
-                led.toggle()
-        time.sleep(1)
 
 def neopixel():
     red = [255, 0, 0]
@@ -43,12 +29,15 @@ def neopixel():
         # berekening voor de hoeveelheid lampen die aangezet moeten worden
         number_off_lit_leds = int((distance // (minimal_distance / 8)))
         set_neopixel_color(red, number_off_lit_leds)
+        print("True")
     elif minimal_distance <= distance < optimal_distance:
         # berekening voor de hoeveelheid lampen die aangezet moeten worden
         number_of_lit_leds = int(8 - ((distance - minimal_distance) // ((optimal_distance - minimal_distance) / 8)))
         set_neopixel_color(orange, number_of_lit_leds)
+        print("True")
     else:
         set_neopixel_color(green, 0)
+        print("False")
 
 
 def set_neopixel_color(color, number_of_leds):
@@ -59,6 +48,21 @@ def set_neopixel_color(color, number_of_leds):
     for j in range(8 - number_of_leds, 8):
         np[j] = [0, 0, 0]
         np.write()
+
+
+def send_signal(message):
+    #sends True or false to the computer
+    try:
+        serial_port = "COM3"  #Port where the pico is connected to
+
+        time.sleep(2)
+        # Allow the serial connection to initialize
+
+        # Send the message
+        uart.write(message.encode())
+        uart.close()
+    except Exception as e:
+        print(f"Error sending signal: {e}")
 
 
 def measure_distance():
@@ -83,11 +87,8 @@ def measure_distance():
 
 
 
-
-
 while True:
 
-    test_uart_over_usb()
-    distance = measure_distance()
-    print("distance:", distance, "cm")
+    # test_uart_over_usb()
+    neopixel()
     utime.sleep(1)
