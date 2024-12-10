@@ -45,7 +45,7 @@ def profile(request, user_id):
         'page_title': f'{user.username}\'s Profile',
         'last_played_games': last_played_games,
         'friends': friends,
-        'user': user,
+        'user_profile': user,
     })
 
 @login_required

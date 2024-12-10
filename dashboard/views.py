@@ -82,10 +82,6 @@ def data(request):
     start_week = int(request.GET.get('startWeek'))
     end_week = int(request.GET.get('endWeek'))
 
-    print(year)
-    print(start_week)
-    print(end_week)
-
     if not year or not (1 <= start_week <= 53) or not (1 <= end_week <= 53):
         return JsonResponse({'error': 'Invalid parameters'}, status=400)
 

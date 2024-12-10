@@ -1,197 +1,219 @@
 <!-- dashboard.html -->
 {% extends 'base.html' %}
 {% block style %}
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-    totalPlayedData = false;
-    weeklyPlayedData = false;
-
-    // Load the Google Charts library
-    google.charts.load('current', {'packages': ['corechart']});
-    google.charts.setOnLoadCallback(drawCharts);
-
-    function drawCharts(year = false, startWeek = false, endWeek = false, skip = false) {
-        year = year || new Date().getFullYear();
-        startWeek = startWeek || 1;
-        endWeek = endWeek || 52;
-
-
-        if (skip) {
-            changeYearAndWeek(year, startWeek, endWeek);
-            drawTotalPlayedChart(totalPlayedData);
-            drawWeeklyPlayedChart(weeklyPlayedData);
-            return;
-        }
-
-        fetch('/dashboard/data?year=' + year + '&startWeek=' + startWeek + '&endWeek=' + endWeek)
-            .then(response => response.json())
-            .then(data => {
-                changeYearAndWeek(year, startWeek, endWeek);
-                $('.spinner-border').parent().addClass('d-none');
-                $('.visually-hidden').removeClass('visually-hidden');
-                if (data.totalPlayed.length === 0) {
-                    document.getElementById('total-played-chart').innerHTML = '<p class="text-center text-muted">No data available</p>';
-                } else {
-                    document.getElementById('total-played-chart').innerHTML = '';
-
-                    totalPlayedData = data.totalPlayed;
-                    drawTotalPlayedChart(data.totalPlayed);
-                }
-                if (data.weeklyPlayed.length === 0) {
-                    document.getElementById('weekly-played-chart').innerHTML = '<p class="text-center text-muted">No data available</p>';
-                } else {
-                    document.getElementById('weekly-played-chart').innerHTML = '';
-
-                    weeklyPlayedData = data.weeklyPlayed;
-                    drawWeeklyPlayedChart(data.weeklyPlayed);
-                }
-
-            });
-    }
-
-    // Pie Chart: Total Played Per Game
-    function drawTotalPlayedChart(totalPlayedData) {
-        console.log(totalPlayedData);
-        const chartData = [['Game', 'Total Time', {role: 'link'}]];
-        totalPlayedData.forEach(item => {
-            const url = '/games/' + item.appId;
-            chartData.push([item.game_name + ' (' + item.total_time + ' hours)', item.total_time, url]);
-        });
-
-        const data = google.visualization.arrayToDataTable(chartData);
-        const options = {
-            title: 'Total Played Time Per Game',
-            pieHole: 0.4,
-            backgroundColor: '#f8f9fa',
-        };
-
-        const chart = new google.visualization.PieChart(document.getElementById('total-played-chart'));
-
-        google.visualization.events.addListener(chart, 'select', function () {
-            const selection = chart.getSelection();
-            if (selection.length > 0) {
-                const row = selection[0].row;
-                const link = data.getValue(row, 2); // Get the URL
-                if (link) {
-                    console.log("Redirecting to:", link); // Log for debugging
-                    window.location.href = link; // Redirect
-                } else {
-                    console.warn("No link found for the selected row.");
-                }
-            }
-        });
-
-        google.visualization.events.addListener(chart, 'onmouseover', function () {
-            document.getElementById('total-played-chart').style.cursor = 'pointer';
-        });
-
-        chart.draw(data, options);
-    }
-
-    // Bar Chart: Played Per Game Per Week
-    function drawWeeklyPlayedChart(playedPerWeekData) {
-        const header = ['Week'];
-        const gameUrls = {}; // To map game names to their respective URLs
-
-        // Populate header and game URL mapping
-        playedPerWeekData.forEach(item => {
-            console.log(item);
-            if (!header.includes(item.game_name)) {
-                header.push(item.game_name);
-                gameUrls[item.game_name] = `/games/${item.app_id}`; // Add game URL
-            }
-        });
-
-        const weeklyData = {};
-
-        playedPerWeekData.forEach(item => {
-            const week = 'Week ' + item.week;
-            if (!weeklyData[week]) {
-                weeklyData[week] = {};
-            }
-            if (!weeklyData[week][item.game_name]) {
-                weeklyData[week][item.game_name] = 0;
-            }
-            weeklyData[week][item.game_name] += Math.round(item.total_time);
-        });
-
-        const chartData = [header];
-
-        Object.keys(weeklyData).forEach(week => {
-            const row = [week]; // Start with the week
-            header.slice(1).forEach(game => {
-                row.push(weeklyData[week][game] || 0); // Add total time for the game or 0 if not played
-            });
-            chartData.push(row);
-        });
-
-        const data = google.visualization.arrayToDataTable(chartData);
-
-        const options = {
-            title: 'Played Time Per Game Per Week',
-            xAxis: {title: 'Week'},
-            yAxis: {title: 'Total Time'},
-            hAxis: {
-                title: 'Week',
-                titleTextStyle: {color: '#333'}
-            },
-            vAxis: {
-                minValue: 0,
-                title: 'Total Time',
-                titleTextStyle: {color: '#333'}
-            },
-            legend: {position: 'top', maxLines: 3, textStyle: {color: 'black'}},
-            isStacked: true,
-            backgroundColor: '#f8f9fa',
-        };
-
-        const chart = new google.visualization.ColumnChart(document.getElementById('weekly-played-chart'));
-
-        // Add pointer cursor on hover
-        google.visualization.events.addListener(chart, 'onmouseover', function () {
-            document.getElementById('weekly-played-chart').style.cursor = 'pointer';
-        });
-
-        google.visualization.events.addListener(chart, 'onmouseout', function () {
-            document.getElementById('weekly-played-chart').style.cursor = 'default';
-        });
-
-        // Add click behavior
-        google.visualization.events.addListener(chart, 'select', function () {
-            const selection = chart.getSelection();
-            if (selection.length > 0) {
-                const row = selection[0].row; // Get the selected row index
-                const column = selection[0].column; // Get the selected column index
-
-                if (column > 0) { // Ensure a game column is selected (not the 'Week' column)
-                    const game = header[column]; // Get the game name from the header
-                    const url = gameUrls[game]; // Get the URL for the selected game
-                    if (url) {
-                        console.log(`Redirecting to: ${url}`);
-                        window.location.href = url; // Redirect to the game's URL
-                    }
-                }
-            }
-        });
-
-        chart.draw(data, options);
-    }
-
-
-    window.addEventListener('resize', function () {
-        drawCharts(false, false, false, true);
-    });
-
-    function changeYearAndWeek(year, startWeek, endWeek) {
-        $('.year').text(year);
-        $('#startWeekText').text(startWeek);
-        $('#endWeekText').text(endWeek);
-    }
-</script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="px-md-5 px-3">
+    <script type="text/javascript">
+        totalPlayedData = false;
+        weeklyPlayedData = false;
+
+        let bgColor = {% if user.dark_mode %} '#212529'{% else %} '#f8f9fa' {% endif %}
+        let textColor = {% if user.dark_mode %} '#f8f9fa'{% else %} '#000' {% endif %}
+        let lightTextColor = {% if user.dark_mode %} '#f8f9fa'{% else %} '#959595' {% endif %}
+
+        // Load the Google Charts library
+        google.charts.load('current', {'packages': ['corechart']});
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts(year = false, startWeek = false, endWeek = false, skip = false) {
+            year = year || new Date().getFullYear();
+            startWeek = startWeek || 1;
+            endWeek = endWeek || 52;
+
+
+            if (skip) {
+                changeYearAndWeek(year, startWeek, endWeek);
+                drawTotalPlayedChart(totalPlayedData);
+                drawWeeklyPlayedChart(weeklyPlayedData);
+                return;
+            }
+
+            fetch('/dashboard/data?year=' + year + '&startWeek=' + startWeek + '&endWeek=' + endWeek)
+                .then(response => response.json())
+                .then(data => {
+                    changeYearAndWeek(year, startWeek, endWeek);
+                    $('.spinner-border').parent().addClass('d-none');
+                    $('.visually-hidden').removeClass('visually-hidden');
+                    if (data.totalPlayed.length === 0) {
+                        document.getElementById('total-played-chart').innerHTML = '<p class="text-center text-muted">No data available</p>';
+                    } else {
+                        document.getElementById('total-played-chart').innerHTML = '';
+
+                        totalPlayedData = data.totalPlayed;
+                        drawTotalPlayedChart(data.totalPlayed);
+                    }
+                    if (data.weeklyPlayed.length === 0) {
+                        document.getElementById('weekly-played-chart').innerHTML = '<p class="text-center text-muted">No data available</p>';
+                    } else {
+                        document.getElementById('weekly-played-chart').innerHTML = '';
+
+                        weeklyPlayedData = data.weeklyPlayed;
+                        drawWeeklyPlayedChart(data.weeklyPlayed);
+                    }
+
+                });
+        }
+
+        // Pie Chart: Total Played Per Game
+        function drawTotalPlayedChart(totalPlayedData) {
+            console.log(totalPlayedData);
+            const chartData = [['Game', 'Total Time', {role: 'link'}]];
+            totalPlayedData.forEach(item => {
+                const url = '/games/' + item.appId;
+                chartData.push([item.game_name + ' (' + item.total_time + ' hours)', item.total_time, url]);
+            });
+
+            const data = google.visualization.arrayToDataTable(chartData);
+            const options = {
+                title: 'Total Played Time Per Game',
+                pieHole: 0.4,
+                backgroundColor: bgColor,
+                legend: {position: 'right', maxLines: 3, textStyle: {color: textColor}},
+                titleTextStyle: {color: textColor},
+            };
+
+            const chart = new google.visualization.PieChart(document.getElementById('total-played-chart'));
+
+            google.visualization.events.addListener(chart, 'select', function () {
+                const selection = chart.getSelection();
+                if (selection.length > 0) {
+                    const row = selection[0].row;
+                    const link = data.getValue(row, 2); // Get the URL
+                    if (link) {
+                        console.log("Redirecting to:", link); // Log for debugging
+                        window.location.href = link; // Redirect
+                    } else {
+                        console.warn("No link found for the selected row.");
+                    }
+                }
+            });
+
+            google.visualization.events.addListener(chart, 'onmouseover', function () {
+                document.getElementById('total-played-chart').style.cursor = 'pointer';
+            });
+
+            chart.draw(data, options);
+        }
+
+        // Bar Chart: Played Per Game Per Week
+        function drawWeeklyPlayedChart(playedPerWeekData) {
+            const header = ['Week'];
+            const gameUrls = {}; // To map game names to their respective URLs
+
+            // Populate header and game URL mapping
+            playedPerWeekData.forEach(item => {
+                console.log(item);
+                if (!header.includes(item.game_name)) {
+                    header.push(item.game_name);
+                    gameUrls[item.game_name] = `/games/${item.app_id}`; // Add game URL
+                }
+            });
+
+            const weeklyData = {};
+
+            playedPerWeekData.forEach(item => {
+                const week = 'Week ' + item.week;
+                if (!weeklyData[week]) {
+                    weeklyData[week] = {};
+                }
+                if (!weeklyData[week][item.game_name]) {
+                    weeklyData[week][item.game_name] = 0;
+                }
+                weeklyData[week][item.game_name] += Math.round(item.total_time);
+            });
+
+            const chartData = [header];
+
+            Object.keys(weeklyData).forEach(week => {
+                const row = [week]; // Start with the week
+                header.slice(1).forEach(game => {
+                    row.push(weeklyData[week][game] || 0); // Add total time for the game or 0 if not played
+                });
+                chartData.push(row);
+            });
+
+            const data = google.visualization.arrayToDataTable(chartData);
+
+            const options = {
+                title: 'Played Time Per Game Per Week',
+                xAxis: {title: 'Week'},
+                yAxis: {title: 'Total Time'},
+                hAxis: {
+                    title: 'Week',
+                    titleTextStyle: {color: lightTextColor},
+                    textColor: textColor
+                },
+                vAxis: {
+                    minValue: 0,
+                    title: 'Total Time',
+                    titleTextStyle: {color: lightTextColor},
+                    textColor: textColor
+                },
+                legend: {position: 'top', maxLines: 3, textStyle: {color: textColor}},
+                isStacked: true,
+                backgroundColor: bgColor,
+                titleTextStyle: {color: textColor},
+            };
+
+            const chart = new google.visualization.ColumnChart(document.getElementById('weekly-played-chart'));
+
+            // Add pointer cursor on hover
+            google.visualization.events.addListener(chart, 'onmouseover', function () {
+                document.getElementById('weekly-played-chart').style.cursor = 'pointer';
+            });
+
+            google.visualization.events.addListener(chart, 'onmouseout', function () {
+                document.getElementById('weekly-played-chart').style.cursor = 'default';
+            });
+
+            // Add click behavior
+            google.visualization.events.addListener(chart, 'select', function () {
+                const selection = chart.getSelection();
+                if (selection.length > 0) {
+                    const row = selection[0].row; // Get the selected row index
+                    const column = selection[0].column; // Get the selected column index
+
+                    if (column > 0) { // Ensure a game column is selected (not the 'Week' column)
+                        const game = header[column]; // Get the game name from the header
+                        const url = gameUrls[game]; // Get the URL for the selected game
+                        if (url) {
+                            console.log(`Redirecting to: ${url}`);
+                            window.location.href = url; // Redirect to the game's URL
+                        }
+                    }
+                }
+            });
+
+            chart.draw(data, options);
+        }
+
+
+        window.addEventListener('resize', function () {
+            drawCharts(false, false, false, true);
+        });
+
+        function changeYearAndWeek(year, startWeek, endWeek) {
+            $('.year').text(year);
+            $('#startWeekText').text(startWeek);
+            $('#endWeekText').text(endWeek);
+        }
+
+        const darkModeToggle = document.querySelector('#dark-mode-toggle');
+        console.log(darkModeToggle.checked);
+        darkModeToggle.addEventListener('change', () => {
+            console.log(darkModeToggle.checked);
+            bgColor = darkModeToggle.checked ? '#212529' : '#f8f9fa';
+            textColor = darkModeToggle.checked ? '#f8f9fa' : '#000';
+            lightTextColor = darkModeToggle.checked ? '#f8f9fa' : '#959595';
+
+            console.log(bgColor, textColor, lightTextColor);
+
+            drawCharts(false, false, false, true);
+        });
+    </script>
+    <div class="px-md-5 px-3">
     <h1 class="text-center mb-4">Welcome to your dashboard {{ user.username }}</h1>
     <div class="alert alert-warning text-center" role="alert">
         <div>
@@ -216,170 +238,171 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% if user.opt_out %}
-    <div class="alert alert-danger text-center" role="alert">
-        <div class="row">
-            <div class="col-4"></div>
-            <div class="col-4">
-                <h2 class="alert-heading">Opted Out</h2>
+        <div class="alert alert-danger text-center" role="alert">
+            <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4">
+                    <h2 class="alert-heading">Opted Out</h2>
+                </div>
+                <div class="col-4 text-end">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             </div>
-            <div class="col-4 text-end">
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-        <p class="mb-3">
-            You have opted out of the dashboard. Your activity data will not contribute to the dashboard and you
-            won't be able to see personalized statistics.
+            <p class="mb-3">
+                You have opted out of the dashboard. Your activity data will not contribute to the dashboard and you
+                won't be able to see personalized statistics.
 
-            If you change your mind, you can update your settings.
-        </p>
-        <a href="{% url 'account:settings' %}" class="btn btn-primary">
-            Update Settings
-        </a>
-    </div>
+                If you change your mind, you can update your settings.
+            </p>
+            <a href="{% url 'account:settings' %}" class="btn btn-primary">
+                Update Settings
+            </a>
+        </div>
     {% endif %}
 
 
     {% if not user.opt_out %}
-    <div class="row mb-4">
-        <h2 class="text-center mb-2">Playtime Statistics</h2>
-        <div class="col-12 col-md-6 mb-3 mb-md-0">
-            <div class="card shadow mb-4 bg-light h-100 text-dark">
-                <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center h-100">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                    <div class="visually-hidden">
-                        <div class="row">
-                            <div class="col-2"></div>
-                            <div class="col-8">
-                                <h5 class="card-title text-center">Total Playtime Per Game (<span
-                                        class="year"></span>)
-                                </h5>
-                            </div>
-                            <div class="col-2 text-end">
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#dashboardFilters">
-                                    <i class="bi bi-funnel"></i>
-                                </button>
+        <div class="row mb-4">
+            <h2 class="text-center mb-2">Playtime Statistics</h2>
+            <div class="col-12 col-md-6 mb-3 mb-md-0">
+                <div class="card shadow mb-4 bg-light h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
-                        <div id="total-played-chart" style="height: 300px;"></div>
-                        <p class="text-center text-muted text-dark">Total playtime per game in hours</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6">
-            <div class="card shadow mb-4 bg-light h-100 text-dark">
-                <div class="card-body">
-                    <div class="d-flex justify-content-center align-items-center h-100">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                    <div class="visually-hidden">
-                        <div class="row">
-                            <div class="col-2"></div>
-                            <div class="col-8">
-                                <h5 class="card-title text-center">Weekly Playtime Per Game (<span
-                                        class="year"></span> -
-                                    Week
-                                    <span id="startWeekText"></span> to <span id="endWeekText"></span>)</h5>
+                        <div class="visually-hidden">
+                            <div class="row">
+                                <div class="col-2"></div>
+                                <div class="col-8">
+                                    <h5 class="card-title text-center">Total Playtime Per Game (<span
+                                            class="year"></span>)
+                                    </h5>
+                                </div>
+                                <div class="col-2 text-end">
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#dashboardFilters">
+                                        <i class="bi bi-funnel"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-2 text-end">
-                                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#dashboardFilters">
-                                    <i class="bi bi-funnel"></i>
-                                </button>
-                            </div>
-                            <div id="weekly-played-chart" style="height: 300px;"></div>
-                            <p class="text-center text-muted">Weekly playtime per game in hours</p>
+                            <div id="total-played-chart" style="height: 300px;"></div>
+                            <p class="text-center text-muted">Total playtime per game in hours</p>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="col-12 col-md-6">
+                <div class="card shadow mb-4 bg-light h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="visually-hidden">
+                            <div class="row">
+                                <div class="col-2"></div>
+                                <div class="col-8">
+                                    <h5 class="card-title text-center">Weekly Playtime Per Game (<span
+                                            class="year"></span> -
+                                        Week
+                                        <span id="startWeekText"></span> to <span id="endWeekText"></span>)</h5>
+                                </div>
+                                <div class="col-2 text-end">
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#dashboardFilters">
+                                        <i class="bi bi-funnel"></i>
+                                    </button>
+                                </div>
+                                <div id="weekly-played-chart" style="height: 300px;"></div>
+                                <p class="text-center text-muted">Weekly playtime per game in hours</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row">
+        <div class="row">
         <div class="col-12">
             <h2>Last played games</h2>
             <div class="row flex-nowrap overflow-auto">
                 {% for game in last_played_games %}
-                <div class="col-4 col-xl-2">
-                    <div class="card mb-4 shadow-sm h-100">
-                        {% if game.user_game.app.steam_image %}
-                        <img src="{{ game.user_game.app.steam_image }}" class="card-img-top" style="max-width: 500px;"
-                             alt="{{ game.app.name }}">
-                        {% else %}
-                        <p class="text-center text-muted">No image available.</p>
-                        {% endif %}
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ game.user_game.app.name }}</h5>
-                            {# last played date#}
-                            <p class="card-text text-truncate"
-                               style="max-height: 60px; overflow: hidden;">
-                                {% if game.end_timestamp %}
-                                    {{ game.end_timestamp|date:"F j, Y H:i" }}
-                                {% else %}
-                                <span class="text-success">Ongoing</span>
-                                {% endif %}
-                            </p>
-                            {# total hours#}
-                            <p class="card-text text-truncate"
-                               style="max-height: 60px; overflow: hidden;">
-                            </p>
-                            <div class="mt-auto">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <a href="{% url 'game' game.user_game.app.appid %}"
-                                       class="btn btn-sm btn-primary">
-                                        View
-                                    </a>
-                                    <div class="text-end">
+                    <div class="col-4 col-xl-2">
+                        <div class="card mb-4 shadow-sm h-100">
+                            {% if game.user_game.app.steam_image %}
+                                <img src="{{ game.user_game.app.steam_image }}" class="card-img-top"
+                                     style="max-width: 500px;"
+                                     alt="{{ game.app.name }}">
+                            {% else %}
+                                <p class="text-center text-muted">No image available.</p>
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ game.user_game.app.name }}</h5>
+                                {# last played date#}
+                                <p class="card-text text-truncate"
+                                   style="max-height: 60px; overflow: hidden;">
+                                    {% if game.end_timestamp %}
+                                        {{ game.end_timestamp|date:"F j, Y H:i" }}
+                                    {% else %}
+                                        <span class="text-success">Ongoing</span>
+                                    {% endif %}
+                                </p>
+                                {# total hours#}
+                                <p class="card-text text-truncate"
+                                   style="max-height: 60px; overflow: hidden;">
+                                </p>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'game' game.user_game.app.appid %}"
+                                           class="btn btn-sm btn-primary">
+                                            View
+                                        </a>
+                                        <div class="text-end">
                                                 <span class="text-success fw-bold">
                                                     Played {{ game.total_time }} hours
                                                 </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 {% endfor %}
             </div>
         </div>
-        {% endif %}
-        <div class="col-12 mt-5">
-            <h2>Most played games</h2>
-            <div class="row flex-nowrap overflow-auto">
+    {% endif %}
+    <div class="col-12 mt-5">
+        <h2>Most played games</h2>
+        <div class="row flex-nowrap overflow-auto">
 
-                {% for game in top_10_games %}
+            {% for game in top_10_games %}
                 <div class="col-4">
                     <div class="card mb-4 shadow-sm h-100">
                         {% if game.steam_image %}
-                        <div class="img-wrapper position-relative">
-                            <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
-                               style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{forloop.counter}}</p>
-                            <img src="{{ game.steam_image }}" class="card-img-top"
-                                 alt="{{ game.name }}">
-                        </div>
+                            <div class="img-wrapper position-relative">
+                                <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                   style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                <img src="{{ game.steam_image }}" class="card-img-top"
+                                     alt="{{ game.name }}">
+                            </div>
                         {% else %}
-                        <p class="text-center text-muted">No image available.</p>
+                            <p class="text-center text-muted">No image available.</p>
                         {% endif %}
                         <div class="card-body d-flex flex-column">
 
                             <h5 class="card-title">{{ game.name }}</h5>
                             {% if game.short_description %}
-                            <p class="card-text text-truncate"
-                               style="max-height: 60px; overflow: hidden;">
-                                {{ game.short_description }}
-                            </p>
+                                <p class="card-text text-truncate"
+                                   style="max-height: 60px; overflow: hidden;">
+                                    {{ game.short_description }}
+                                </p>
                             {% else %}
-                            <p class="card-text text-truncate"
-                               style="max-height: 60px; overflow: hidden;">
-                                No description available.
-                            </p>
+                                <p class="card-text text-truncate"
+                                   style="max-height: 60px; overflow: hidden;">
+                                    No description available.
+                                </p>
                             {% endif %}
                             <div class="mt-auto">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -397,39 +420,39 @@
                         </div>
                     </div>
                 </div>
-                {% endfor %}
+            {% endfor %}
 
-            </div>
-            <div class="col-12 mt-5">
-                <h2>Best reviewed games</h2>
-                <div class="row flex-nowrap overflow-auto">
+        </div>
+        <div class="col-12 mt-5">
+            <h2>Best reviewed games</h2>
+            <div class="row flex-nowrap overflow-auto">
 
-                    {% for game in best_reviewed_games %}
+                {% for game in best_reviewed_games %}
                     <div class="col-4">
                         <div class="card mb-4 shadow-sm h-100">
                             {% if game.steam_image %}
-                            <div class="img-wrapper position-relative">
-                                <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
-                                   style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
-                                <img src="{{ game.steam_image }}" class="card-img-top"
-                                     alt="{{ game.name }}">
-                            </div>
+                                <div class="img-wrapper position-relative">
+                                    <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                       style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                    <img src="{{ game.steam_image }}" class="card-img-top"
+                                         alt="{{ game.name }}">
+                                </div>
                             {% else %}
-                            <p class="text-center text-muted">No image available.</p>
+                                <p class="text-center text-muted">No image available.</p>
                             {% endif %}
                             <div class="card-body d-flex flex-column">
 
                                 <h5 class="card-title">{{ game.name }}</h5>
                                 {% if game.short_description %}
-                                <p class="card-text text-truncate"
-                                   style="max-height: 60px; overflow: hidden;">
-                                    {{ game.short_description }}
-                                </p>
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        {{ game.short_description }}
+                                    </p>
                                 {% else %}
-                                <p class="card-text text-truncate"
-                                   style="max-height: 60px; overflow: hidden;">
-                                    No description available.
-                                </p>
+                                    <p class="card-text text-truncate"
+                                       style="max-height: 60px; overflow: hidden;">
+                                        No description available.
+                                    </p>
                                 {% endif %}
                                 <div class="mt-auto">
                                     <div class="d-flex justify-content-between align-items-center">
@@ -447,10 +470,10 @@
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
-                </div>
+                {% endfor %}
             </div>
         </div>
-        {% include 'modals/dashboard_filters.html' %}
-        {% endblock %}
+    </div>
+    {% include 'modals/dashboard_filters.html' %}
+{% endblock %}
 
