@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.db.models.functions import Cast
 
+from account.models import Friend
 from dashboard.models import Games, GameCategoriesLink, UserGames, GameSessions
 
 
@@ -65,13 +66,15 @@ def index(request):
     average_minutes = round((average_playtime - average_hours) * 60)
     average_playtime = f"{average_hours} hours and {average_minutes} minutes"
 
+    friends = Friend.objects.filter(user=request.user, friend__opt_out=False)
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',
         'top_10_games': top_10_games,
         'best_reviewed_games': best_reviewed_games,
         'last_played_games': last_played,
         'total_playtime': total_playtime,
-        'average_playtime': average_playtime
+        'average_playtime': average_playtime,
+        'friends': friends,
     })
 
 def get_total_played_data(year, user_id):
@@ -104,6 +107,12 @@ def data(request):
     year = request.GET.get('year')
     start_week = int(request.GET.get('startWeek'))
     end_week = int(request.GET.get('endWeek'))
+    user_id = request.GET.get('userId', request.user.id)
+    print(user_id)
+
+    # check if user is friends and not oped out
+    if not Friend.objects.filter(user=request.user, friend__id=user_id, friend__opt_out=False).exists() and user_id != request.user.id:
+        return JsonResponse({'error': 'Unauthorized'}, status=401)
 
     if not year or not (1 <= start_week <= 53) or not (1 <= end_week <= 53):
         return JsonResponse({'error': 'Invalid parameters'}, status=400)
@@ -112,8 +121,8 @@ def data(request):
     year = int(year)
 
     # Query your database to get data for the selected week range
-    total_played = get_total_played_data(year, request.user.id)
-    weekly_played = get_weekly_played_data(year, start_week, end_week, request.user.id)
+    total_played = get_total_played_data(year, user_id)
+    weekly_played = get_weekly_played_data(year, start_week, end_week, user_id)
 
     return JsonResponse({
         'totalPlayed': total_played,

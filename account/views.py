@@ -38,7 +38,7 @@ def profile(request, user_id):
             'page_title': '404',
         })
 
-    friends = Friend.objects.filter(user=user, friend__public_profile=True)
+    friends = Friend.objects.filter(user=user, friend__public_profile=True, friend__opt_out=False)
     last_played_games = GameSessions.objects.filter(user_game__user=user).order_by('-start_timestamp')[:3]
 
     return render(request, 'account/profile.html', {

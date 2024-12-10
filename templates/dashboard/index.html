@@ -149,7 +149,84 @@
                 </div>
             </wrapper>
             <wrapper>
-                <h2 class="text-center mb-2">Friend Statistics</h2>
+                <script type="text/javascript" src="{% static 'js/dashboard/friendCharts.js' %}"></script>
+                <div class="row mb-3">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h2 class="text-center mb-2">Friend Statistics</h2>
+                    </div>
+                    <div class="col-md-4 d-flex justify-content-md-end justify-content-center align-items-center">
+                        <select class="form-select w-50" id="friendSelect" aria-label="Select a friend" onchange="drawChartsFriends()">
+                            {% for friend in friends %}
+                                <option value="{{ friend.friend.id }}" {% if forloop.first %}selected{% endif %}>
+                                    {{ friend.friend.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div class="card shadow mb-4 bg-light h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="visually-hidden">
+                                    <div class="row">
+                                        <div class="col-2"></div>
+                                        <div class="col-8">
+                                            <h5 class="card-title text-center">Total Playtime Per Game (<span
+                                                    class="year-friend"></span>)
+                                            </h5>
+                                        </div>
+                                        <div class="col-2 text-end">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#dashboardFilters">
+                                                <i class="bi bi-funnel"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="total-played-chart-friend" style="height: 300px;"></div>
+                                    <p class="text-center text-muted">Total playtime per game in hours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card shadow mb-4 bg-light h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="visually-hidden">
+                                    <div class="row">
+                                        <div class="col-2"></div>
+                                        <div class="col-8">
+                                            <h5 class="card-title text-center">Weekly Playtime Per Game (<span
+                                                    class="year-friend"></span> -
+                                                Week
+                                                <span id="startWeekText-friend"></span> to <span id="endWeekText-friend"></span>)</h5>
+                                        </div>
+                                        <div class="col-2 text-end">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#dashboardFilters">
+                                                <i class="bi bi-funnel"></i>
+                                            </button>
+                                        </div>
+                                        <div id="weekly-played-chart-friend" style="height: 300px;"></div>
+                                        <p class="text-center text-muted">Weekly playtime per game in hours</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
             </wrapper>
 
