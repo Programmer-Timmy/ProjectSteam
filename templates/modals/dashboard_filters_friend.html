@@ -73,7 +73,7 @@
         }
         
         // Set current week as the default for start and end weeks
-        startWeekDropdown.value = Math.ceil((new Date().getDate() - new Date(new Date().getFullYear(), 0, 1).getDate() + 1) / 7);
+        startWeekDropdown.value = 1;
         endWeekDropdown.value = weeksInYear;
 
         document.getElementById('friend-form').addEventListener('submit', function (event) {
@@ -88,12 +88,12 @@
             startWeekDropdown.classList.remove('is-invalid');
 
             if (!year || !startWeek || !endWeek) {
-                $('#endWeek').addClass('is-invalid');
+                $('#endWeek-friend').addClass('is-invalid');
                 return;
             }
 
             if (parseInt(startWeek) > parseInt(endWeek)) {
-                $('#startWeek').addClass('is-invalid');
+                $('#startWeek-friend').addClass('is-invalid');
                 return;
             }
 

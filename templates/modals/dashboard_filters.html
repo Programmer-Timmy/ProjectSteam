@@ -3,7 +3,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="dashboardFiltersLabel">Select Year and Week Range</h5>
+                <h5 class="modal-title" id="dashboardFiltersLabel">Filter activity</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -73,7 +73,7 @@
         }
         
         // Set current week as the default for start and end weeks
-        startWeekDropdown.value = Math.ceil((new Date().getDate() - new Date(new Date().getFullYear(), 0, 1).getDate() + 1) / 7);
+        startWeekDropdown.value = 1;
         endWeekDropdown.value = weeksInYear;
 
         document.getElementById('weekRangeForm').addEventListener('submit', function (event) {
