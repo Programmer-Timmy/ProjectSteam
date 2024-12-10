@@ -49,7 +49,6 @@ function drawCharts(year = false, startWeek = false, endWeek = false, skip = fal
 function drawTotalPlayedChart(totalPlayedData) {
     const chartData = [['Game', 'Total Time', {role: 'link'}]];
     totalPlayedData.forEach(item => {
-        console.log(item);
         const url = '/games/' + item.app_id;
         chartData.push([item.game_name + ' (' + item.total_time + ' hours)', item.total_time, url]);
     });
