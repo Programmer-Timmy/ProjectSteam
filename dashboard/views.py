@@ -3,7 +3,7 @@ from http.client import responses
 
 from django.contrib.auth.decorators import login_required
 from django.db import models
-from django.db.models import Prefetch, Sum, ExpressionWrapper, F
+from django.db.models import Prefetch, Sum, ExpressionWrapper, F, Count
 from django.db.models.functions import ExtractWeek
 from django.forms import DurationField, FloatField
 from django.http import JsonResponse
@@ -44,11 +44,34 @@ def index(request):
     last_played = GameSessions.objects.filter(user_game__user=request.user
                                               ).order_by('-start_timestamp')[:6]
 
+    total_hours = GameSessions.objects.filter(user_game__user=request.user).aggregate(total=Sum('total_time'))['total']
+
+    hours = int(total_hours)  # Get the whole hours part
+    minutes = round((total_hours - hours) * 60)
+
+    total_playtime = f"{hours} hours and {minutes} minutes"
+
+
+    # get the average playtime of all the games
+
+    average_playtime  = GameSessions.objects.filter(
+        user_game__user=request.user
+    ).aggregate(
+        average=Sum('total_time') / Count('id')
+    )['average']
+
+    # calculate the average playtime in hours and minutes
+    average_hours = int(average_playtime)
+    average_minutes = round((average_playtime - average_hours) * 60)
+    average_playtime = f"{average_hours} hours and {average_minutes} minutes"
+
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',
         'top_10_games': top_10_games,
         'best_reviewed_games': best_reviewed_games,
         'last_played_games': last_played,
+        'total_playtime': total_playtime,
+        'average_playtime': average_playtime
     })
 
 def get_total_played_data(year, user_id):
