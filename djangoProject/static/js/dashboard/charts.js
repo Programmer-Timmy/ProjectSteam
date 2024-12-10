@@ -23,8 +23,8 @@ function drawCharts(year = false, startWeek = false, endWeek = false, skip = fal
         .then(response => response.json())
         .then(data => {
             changeYearAndWeek(year, startWeek, endWeek);
-            $('.spinner-border').parent().addClass('d-none');
-            $('.visually-hidden').removeClass('visually-hidden');
+            $('.spinner-border.user').parent().addClass('d-none');
+            $('.visually-hidden.user').removeClass('visually-hidden');
             if (data.totalPlayed.length === 0) {
                 document.getElementById('total-played-chart').innerHTML = '<p class="text-center text-muted">No data available</p>';
             } else {
@@ -192,4 +192,5 @@ darkModeToggle.addEventListener('change', () => {
     lightTextColor = darkModeToggle.checked ? '#f8f9fa' : '#959595';
 
     drawCharts(false, false, false, true);
+    drawChartsFriends(false, false, false, true);
 });

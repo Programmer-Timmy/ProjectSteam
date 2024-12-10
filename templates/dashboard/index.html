@@ -91,11 +91,11 @@
                         <div class="card shadow mb-4 bg-light h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-center align-items-center h-100">
-                                    <div class="spinner-border text-primary" role="status">
+                                    <div class="spinner-border user text-primary" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
-                                <div class="visually-hidden">
+                                <div class="visually-hidden user">
                                     <div class="row">
                                         <div class="col-2"></div>
                                         <div class="col-8">
@@ -120,11 +120,11 @@
                         <div class="card shadow mb-4 bg-light h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-center align-items-center h-100">
-                                    <div class="spinner-border text-primary" role="status">
+                                    <div class="spinner-border user text-primary" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
-                                <div class="visually-hidden">
+                                <div class="visually-hidden user">
                                     <div class="row">
                                         <div class="col-2"></div>
                                         <div class="col-8">
@@ -170,11 +170,11 @@
                         <div class="card shadow mb-4 bg-light h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-center align-items-center h-100">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Loading...</span>
+                                    <div class="spinner-border friend text-primary" role="status">
+                                        <span class="visually-hidden friend">Loading...</span>
                                     </div>
                                 </div>
-                                <div class="visually-hidden">
+                                <div class="visually-hidden friend">
                                     <div class="row">
                                         <div class="col-2"></div>
                                         <div class="col-8">
@@ -184,7 +184,7 @@
                                         </div>
                                         <div class="col-2 text-end">
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#dashboardFilters">
+                                                    data-bs-target="#dashboardFiltersFriend">
                                                 <i class="bi bi-funnel"></i>
                                             </button>
                                         </div>
@@ -199,11 +199,11 @@
                         <div class="card shadow mb-4 bg-light h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-center align-items-center h-100">
-                                    <div class="spinner-border text-primary" role="status">
+                                    <div class="spinner-border friend text-primary" role="status">
                                         <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
-                                <div class="visually-hidden">
+                                <div class="visually-hidden friend">
                                     <div class="row">
                                         <div class="col-2"></div>
                                         <div class="col-8">
@@ -214,7 +214,7 @@
                                         </div>
                                         <div class="col-2 text-end">
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#dashboardFilters">
+                                                    data-bs-target="#dashboardFiltersFriend">
                                                 <i class="bi bi-funnel"></i>
                                             </button>
                                         </div>
@@ -226,8 +226,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </wrapper>
 
             <div class="row">
@@ -387,5 +385,6 @@
         </div>
     </div>
     {% include 'modals/dashboard_filters.html' %}
+    {% include 'modals/dashboard_filters_friend.html' %}
 {% endblock %}
 

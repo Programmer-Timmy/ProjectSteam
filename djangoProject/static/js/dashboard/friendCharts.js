@@ -21,9 +21,9 @@ function drawChartsFriends(year = false, startWeek = false, endWeek = false, ski
     fetch('/dashboard/data?year=' + year + '&startWeek=' + startWeek + '&endWeek=' + endWeek + '&userId=' + friend_id)
         .then(response => response.json())
         .then(data => {
-            changeYearAndWeek(year, startWeek, endWeek);
-            $('.spinner-border-friend').parent().addClass('d-none');
-            $('.visually-hidden-friend').removeClass('visually-hidden');
+            changeYearAndWeekFriends(year, startWeek, endWeek);
+            $('.spinner-border.friend').parent().addClass('d-none');
+            $('.visually-hidden.friend').removeClass('visually-hidden');
             if (data.totalPlayed.length === 0) {
                 document.getElementById('total-played-chart-friend').innerHTML = '<p class="text-center text-muted">No data available</p>';
             } else {
