@@ -1,0 +1,43 @@
+<footer class="bg-dark text-white pt-4 mt-auto">
+    <div class="container">
+        <div class="row">
+            <!-- About Section -->
+            <div class="col-md-6 mb-4">
+                <h5>About</h5>
+                <p class="small" style="color: #8f8f8f;">
+                    Welcome to your personalized, Steam-inspired gaming dashboard! Get a comprehensive view of your
+                    gaming stats, including total and average playtime across your favorite titles. Stay connected with
+                    friends, see trending games, and explore top-rated titles. Plan your next gaming session, compare
+                    achievements, and stay up-to-date with the latest trends. Our dashboard helps you make data-driven
+                    decisions and enhances your gaming experience like never before! 
+                </p>
+            </div>
+            <!-- Quick Links Section -->
+            <div class="col-md-3 mb-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'dashboard-index' %}"
+                           class="text-white text-decoration-none small">Dashboard</a></li>
+                    <li><a href="{% url 'account:profile' %}" class="text-white text-decoration-none small">Your
+                        Profile</a></li>
+                    <li><a href="{% url 'games-index' %}" class="text-white text-decoration-none small">Games</a></li>
+                    <li><a href="{% url 'account:settings' %}"
+                           class="text-white text-decoration-none small">Settings</a></li>
+                </ul>
+            </div>
+
+            <!-- Team Section the dummy team members -->
+            <div class="col-md-3 mb-4">
+                <h5>Team</h5>
+                <ul class="list-unstyled">
+                    <li><a class="text-white text-decoration-none small">Tim</a></li>
+                    <li><a class="text-white text-decoration-none small">Jerome</a></li>
+                    <li><a class="text-white text-decoration-none small">Chris</a></li>
+                    <li><a class="text-white text-decoration-none small">Oscar</a></li>
+                </ul>
+            </div>
+            <div class="text-center py-3 border-top border-secondary">
+                <small style="color: #8f8f8f;">© 2024 Gaming Dashboard. Inspired by Steam.</small>
+            </div>
+        </div>
+</footer>

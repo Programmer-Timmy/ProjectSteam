@@ -28,4 +28,9 @@
     background-color: var(--bs-navbar-bg);
     color: var(--bs-navbar-color);
   }
+
+  .card.bg-light {
+    background-color: rgb(33 37 41) !important;
+  }
+
 }

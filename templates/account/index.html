@@ -74,18 +74,19 @@
             <div class="row g-4">
                 <!-- Last Played Games Section -->
                 <div class="col-12">
-                    <div class="card bg-light border-0 p-3 text-dark shadow">
+                    <div class="card bg-light border-0 p-3 shadow">
                         <h3>Last Played Games</h3>
                         <div class="row g-3">
                             {% if last_played_games %}
                                 {% for game in last_played_games %}
                                     <div class="col-md-6 col-lg-4">
-                                        <div class="card shadow-md h-100 border-0 bg-dark text-white">
-                                            <img src="{{ game.app.steam_image }}" class="rounded-top img-fluid"
-                                                 alt="{{ game.app.name }}">
+                                        <div class="card shadow h-100 border-0 bg-dark text-white">
+                                            <img src="{{ game.user_game.app.steam_image }}" class="rounded-top img-fluid"
+                                                 alt="{{ game.user_game.app.name }}">
                                             <div class="card-body">
-                                                <h5 class="card-title">{{ game.app.name }}</h5>
-                                                <p class="card-text">Played {{ game.last_played|date:"F j, Y" }}</p>
+                                                <h5 class="card-title">{{ game.user_game.app.name }}</h5>
+                                                <p class="card-text">Played {{ game.user_game.last_played|date:"F j, Y" }}</p>
+                                                <p class="card-text">Playtime: {{ game.total_time }} hours</p>
                                             </div>
                                         </div>
                                     </div>
@@ -99,14 +100,14 @@
                 {% if user.show_friends %}
                     <!-- Friends Section -->
                     <div class="col-12">
-                        <div class="card bg-light border-0 p-3 text-dark shadow">
+                        <div class="card bg-light border-0 p-3 shadow">
                             <h3>Friends</h3>
                             <div class="row g-3">
                                 {% if friends %}
                                     {% for friend in friends %}
                                         {% if friend.friend.public_profile %}
                                             <div class="col-md-4 col-lg-2">
-                                                <div class="card shadow-md h-100 border-0 bg-dark text-white">
+                                                <div class="card shadow h-100 border-0 bg-dark text-white">
                                                     <img src="
                                                 {% if friend.friend.profile_picture %}
                                                     {{ friend.friend.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
