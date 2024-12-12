@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'games.apps.GamesConfig',
     'ajax.apps.AjaxConfig',
     'account.apps.AccountConfig',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -83,7 +84,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 STATICFILES_DIRS = [BASE_DIR / "djangoProject/static"]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+ASGI_APPLICATION = 'djangoProject.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
