@@ -11871,5 +11871,8 @@ textarea.form-control-lg {
   background-color: var(--bs-navbar-bg);
   color: var(--bs-navbar-color);
 }
+[data-bs-theme=dark] .card.bg-light {
+  background-color: rgb(33, 37, 41) !important;
+}
 
 /*# sourceMappingURL=style.css.map */

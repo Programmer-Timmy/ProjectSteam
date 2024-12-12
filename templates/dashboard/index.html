@@ -1,9 +1,20 @@
 <!-- dashboard.html -->
 {% extends 'base.html' %}
+{% load static %}
+{% block style %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        let bgColor = {% if user.dark_mode %} '#212529' {% else %} '#f8f9fa' {% endif %}
+        let textColor = {% if user.dark_mode %} '#f8f9fa' {% else %} '#000' {% endif %}
+        let lightTextColor = {% if user.dark_mode %} '#f8f9fa' {% else %} '#959595' {% endif %}
+    </script>
+
+{% endblock %}
 
 {% block content %}
+    <script type="text/javascript" src="{% static 'js/dashboard/charts.js' %}"></script>
     <div class="px-md-5 px-3">
-        <h1 class="text-center">Welcome to your dashboard {{ user.username }}</h1>
+        <h1 class="text-center mb-4">Welcome to your dashboard {{ user.username }}</h1>
         <div class="alert alert-warning text-center" role="alert">
             <div>
                 <h2>Note from Cosmic Pioneer</h2>
@@ -28,11 +39,11 @@
         </div>
         {% if user.opt_out %}
             <div class="alert alert-danger text-center" role="alert">
-            <div class="row">
-                <div class="col-4"></div>
-                <div class="col-4">
-                    <h2 class="alert-heading">Opted Out</h2>
-                </div>
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Opted Out</h2>
+                    </div>
                     <div class="col-4 text-end">
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -51,105 +62,230 @@
 
 
         {% if not user.opt_out %}
-            <div class="row">
-            <div class="col-12">
-                <h2>Last played games</h2>
-                <div class="row flex-nowrap overflow-auto">
-                    {% for game in last_played_games %}
-                        <div class="col-2">
-                            <div class="card mb-4 shadow-sm h-100">
-                                {% if game.app.steam_image %}
-                                    <img src="{{ game.app.steam_image }}" class="card-img-top" style="max-width: 500px;"
-                                         alt="{{ game.app.name }}">
-                                {% else %}
-                                    <p class="text-center text-muted">No image available.</p>
-                                {% endif %}
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">{{ game.app.name }}</h5>
-                                    {#                                    last played date#}
-                                    <p class="card-text text-truncate"
-                                       style="max-height: 60px; overflow: hidden;">
-                                        Last played: {{ game.last_played }}
-                                    </p>
-                                    {#                                    total hours#}
-                                    <p class="card-text text-truncate"
-                                       style="max-height: 60px; overflow: hidden;">
-                                    </p>
-                                    <div class="mt-auto">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{% url 'game' game.app.appid %}"
-                                               class="btn btn-sm btn-primary">
-                                                View
-                                            </a>
-                                            <div class="text-end">
-                                                <span class="text-success fw-bold">
-                                                    Total Playtime: {{ game.hours_played }} hours
-                                                </span>
-                                            </div>
+            <wrapper>
+                <h2 class="text-center mb-2">Playtime Statistics</h2>
+                <div class="row mb-4">
+                    <!-- Total Playtime Card -->
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div class="card shadow h-100 text-center bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">Total Playtime</h5>
+                                <h1 class="display-4 fw-bold">{{ total_playtime }}</h1>
+                                <p class="card-text text-secondary">Across all games</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Average Playtime Card -->
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div class="card shadow h-100 text-center bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">Average Playtime</h5>
+                                <h1 class="display-4 fw-bold">{{ average_playtime }}</h1>
+                                <p class="card-text text-secondary">Across all games</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div class="card shadow mb-4 bg-light h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border user text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="visually-hidden user">
+                                    <div class="row">
+                                        <div class="col-2"></div>
+                                        <div class="col-8">
+                                            <h5 class="card-title text-center">Total Playtime Per Game (<span
+                                                    class="year"></span>)
+                                            </h5>
+                                        </div>
+                                        <div class="col-2 text-end">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#dashboardFilters">
+                                                <i class="bi bi-funnel"></i>
+                                            </button>
                                         </div>
                                     </div>
+                                    <div id="total-played-chart" style="height: 300px;"></div>
+                                    <p class="text-center text-muted">Total playtime per game in hours</p>
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
-                </div>
-            </div>
-        {% endif %}
-        <div class="col-12 mt-5">
-            <h2>Most played games</h2>
-            <div class="row flex-nowrap overflow-auto">
-
-                {% for game in top_10_games %}
-                    <div class="col-4">
-                        <div class="card mb-4 shadow-sm h-100">
-                            {% if game.steam_image %}
-                                <div class="img-wrapper position-relative">
-                                    <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
-                                       style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
-                                    <img src="{{ game.steam_image }}" class="card-img-top"
-                                         alt="{{ game.name }}">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card shadow mb-4 bg-light h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border user text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
                                 </div>
-                            {% else %}
-                                <p class="text-center text-muted">No image available.</p>
-                            {% endif %}
-                            <div class="card-body d-flex flex-column">
-
-                                <h5 class="card-title">{{ game.name }}</h5>
-                                {% if game.short_description %}
-                                    <p class="card-text text-truncate"
-                                       style="max-height: 60px; overflow: hidden;">
-                                        {{ game.short_description }}
-                                    </p>
-                                {% else %}
-                                    <p class="card-text text-truncate"
-                                       style="max-height: 60px; overflow: hidden;">
-                                        No description available.
-                                    </p>
-                                {% endif %}
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <a href="{% url 'game' game.appid %}"
-                                           class="btn btn-sm btn-primary">
-                                            View
-                                        </a>
-                                        <div class="text-end">
-                                            <small class="d-block text-muted">{{ game.release_date }}</small>
-                                            <span class="text-success fw-bold">{% if game.price == 0 %}
-                                                Free {% else %}{{ game.price }}{% endif %}</span>
+                                <div class="visually-hidden user">
+                                    <div class="row">
+                                        <div class="col-2"></div>
+                                        <div class="col-8">
+                                            <h5 class="card-title text-center">Weekly Playtime Per Game (<span
+                                                    class="year"></span> -
+                                                Week
+                                                <span id="startWeekText"></span> to <span id="endWeekText"></span>)</h5>
                                         </div>
+                                        <div class="col-2 text-end">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#dashboardFilters">
+                                                <i class="bi bi-funnel"></i>
+                                            </button>
+                                        </div>
+                                        <div id="weekly-played-chart" style="height: 300px;"></div>
+                                        <p class="text-center text-muted">Weekly playtime per game in hours</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
+                </div>
+            </wrapper>
+            <wrapper>
+                <script type="text/javascript" src="{% static 'js/dashboard/friendCharts.js' %}"></script>
+                <div class="row mb-3">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h2 class="text-center mb-2">Friend Statistics</h2>
+                    </div>
+                    <div class="col-md-4 d-flex justify-content-md-end justify-content-center align-items-center">
+                        <select class="form-select w-50" id="friendSelect" aria-label="Select a friend" onchange="drawChartsFriends()">
+                            {% for friend in friends %}
+                                <option value="{{ friend.friend.id }}" {% if forloop.first %}selected{% endif %}>
+                                    {{ friend.friend.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-12 col-md-6 mb-3 mb-md-0">
+                        <div class="card shadow mb-4 bg-light h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border friend text-primary" role="status">
+                                        <span class="visually-hidden friend">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="visually-hidden friend">
+                                    <div class="row">
+                                        <div class="col-2"></div>
+                                        <div class="col-8">
+                                            <h5 class="card-title text-center">Total Playtime Per Game (<span
+                                                    class="year-friend"></span>)
+                                            </h5>
+                                        </div>
+                                        <div class="col-2 text-end">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#dashboardFiltersFriend">
+                                                <i class="bi bi-funnel"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="total-played-chart-friend" style="height: 300px;"></div>
+                                    <p class="text-center text-muted">Total playtime per game in hours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card shadow mb-4 bg-light h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border friend text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="visually-hidden friend">
+                                    <div class="row">
+                                        <div class="col-2"></div>
+                                        <div class="col-8">
+                                            <h5 class="card-title text-center">Weekly Playtime Per Game (<span
+                                                    class="year-friend"></span> -
+                                                Week
+                                                <span id="startWeekText-friend"></span> to <span id="endWeekText-friend"></span>)</h5>
+                                        </div>
+                                        <div class="col-2 text-end">
+                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                    data-bs-target="#dashboardFiltersFriend">
+                                                <i class="bi bi-funnel"></i>
+                                            </button>
+                                        </div>
+                                        <div id="weekly-played-chart-friend" style="height: 300px;"></div>
+                                        <p class="text-center text-muted">Weekly playtime per game in hours</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </wrapper>
 
+            <div class="row">
+                <div class="col-12">
+                    <h2>Last played games</h2>
+                    <div class="row flex-nowrap overflow-auto">
+                        {% for game in last_played_games %}
+                            <div class="col-4 col-xl-2">
+                                <div class="card mb-4 shadow-sm h-100">
+                                    {% if game.user_game.app.steam_image %}
+                                        <img src="{{ game.user_game.app.steam_image }}" class="card-img-top"
+                                             style="max-width: 500px;"
+                                             alt="{{ game.app.name }}">
+                                    {% else %}
+                                        <p class="text-center text-muted">No image available.</p>
+                                    {% endif %}
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">{{ game.user_game.app.name }}</h5>
+                                        {# last played date#}
+                                        <p class="card-text text-truncate"
+                                           style="max-height: 60px; overflow: hidden;">
+                                            {% if game.end_timestamp %}
+                                                {{ game.end_timestamp|date:"F j, Y H:i" }}
+                                            {% else %}
+                                                <span class="text-success">Ongoing</span>
+                                            {% endif %}
+                                        </p>
+                                        {# total hours#}
+                                        <p class="card-text text-truncate"
+                                           style="max-height: 60px; overflow: hidden;">
+                                        </p>
+                                        <div class="mt-auto">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="{% url 'game' game.user_game.app.appid %}"
+                                                   class="btn btn-sm btn-primary">
+                                                    View
+                                                </a>
+                                                <div class="text-end">
+                                                <span class="text-success fw-bold">
+                                                    Played {{ game.total_time }} hours
+                                                </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-            <div class="col-12 mt-5">
-                <h2>Best reviewed games</h2>
+        {% endif %}
+    </div>
+    <div class="bg-light-subtle px-5 mt-5 py-3">
+        <div class="row">
+            <div class="col-12">
+                <h2>Most played games</h2>
                 <div class="row flex-nowrap overflow-auto">
 
-                    {% for game in best_reviewed_games %}
+                    {% for game in top_10_games %}
                         <div class="col-4">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if game.steam_image %}
@@ -193,7 +329,62 @@
                             </div>
                         </div>
                     {% endfor %}
+
+                </div>
+                <div class="col-12 mt-5">
+                    <h2>Best reviewed games</h2>
+                    <div class="row flex-nowrap overflow-auto">
+
+                        {% for game in best_reviewed_games %}
+                            <div class="col-4">
+                                <div class="card mb-4 shadow-sm h-100">
+                                    {% if game.steam_image %}
+                                        <div class="img-wrapper position-relative">
+                                            <p class="badge bg-success position-absolute rounded-5 d-flex justify-content-center align-items-center"
+                                               style="font-size: 1rem; width: 30px; height: 30px; top: 5px; left: 5px">{{ forloop.counter }}</p>
+                                            <img src="{{ game.steam_image }}" class="card-img-top"
+                                                 alt="{{ game.name }}">
+                                        </div>
+                                    {% else %}
+                                        <p class="text-center text-muted">No image available.</p>
+                                    {% endif %}
+                                    <div class="card-body d-flex flex-column">
+
+                                        <h5 class="card-title">{{ game.name }}</h5>
+                                        {% if game.short_description %}
+                                            <p class="card-text text-truncate"
+                                               style="max-height: 60px; overflow: hidden;">
+                                                {{ game.short_description }}
+                                            </p>
+                                        {% else %}
+                                            <p class="card-text text-truncate"
+                                               style="max-height: 60px; overflow: hidden;">
+                                                No description available.
+                                            </p>
+                                        {% endif %}
+                                        <div class="mt-auto">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="{% url 'game' game.appid %}"
+                                                   class="btn btn-sm btn-primary">
+                                                    View
+                                                </a>
+                                                <div class="text-end">
+                                                    <small class="d-block text-muted">{{ game.release_date }}</small>
+                                                    <span class="text-success fw-bold">{% if game.price == 0 %}
+                                                        Free {% else %}{{ game.price }}{% endif %}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
+    {% include 'modals/dashboard_filters.html' %}
+    {% include 'modals/dashboard_filters_friend.html' %}
 {% endblock %}
+

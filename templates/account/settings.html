@@ -20,7 +20,7 @@
             </div>
         {% endif %}
         <!-- User Settings Form -->
-        <div class="card p-4 shadow-sm">
+        <div class="card p-4 shadow bg-light">
             <h3 class="card-title mb-4">Your Information</h3>
             <form method="POST" class="form">
                 {% csrf_token %}
@@ -102,7 +102,7 @@
         </div>
 
         <!-- Change Password Form -->
-        <div class="card p-4 shadow-sm mt-4">
+        <div class="card p-4 shadow mt-4 bg-light">
             <h3 class="card-title mb-4">Change Password</h3>
             <form method="POST" class="form">
                 {% csrf_token %}
@@ -149,7 +149,7 @@
             </form>
         </div>
 {#        delete account#}
-        <div class="card p-4 shadow-sm my-4">
+        <div class="card p-4 shadow my-4 bg-light">
             <h3 class="card-title mb-4">Delete Account</h3>
             <a href="{% url 'account:delete' %}" class="btn btn-danger w-100">Delete Account</a>
         </div>
