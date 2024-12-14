@@ -44,7 +44,7 @@ def get_is_to_close_status(request):
 
 @csrf_exempt
 def set_is_to_close_status(request):
-    if request.methon == "POST":
+    if request.method == "POST":
         api_key = request.POST.get('api_key')
         is_to_close = request.POST.get('is_to_close') == 'True'
         user = get_object_or_404(CustomUser, api_key=api_key)

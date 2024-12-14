@@ -1,9 +1,11 @@
 import serial
 import time
 import requests
+from requests.utils import resolve_proxies
 
 api_key = "c907d723-535a-477b-91d9-e7da056a3fba"  #Put your API key over here
-url = "http://localhost:8000/raspberry/status/"
+# url = "http://localhost:8000/raspberry/status/"
+url = "http://localhost:8000/raspberry/is_to_close/"
 
 
 #Simple program to test the connection between the raspberry and the computer.
@@ -22,12 +24,12 @@ def communicate_with_pico():
                     decoded_data = data.decode('utf-8').strip()  # Remove trailing spaces/newlines
                     #Checks if the data send by the Pico is True and check if the last update wasnt also true. this prevents redundant updates
                     if decoded_data.lower() == 'true' and last_update is not True:
-                        update_user_status(True)
+                        update_user_is_to_close(True)
                         last_update = True
                         print("Updated status to: True")
                     # Checks if the data send by the Pico is False and check if the last update wasnt also true. this prevents redundant updates
                     elif decoded_data.lower() == 'false' and last_update is not False:
-                        update_user_status(False)
+                        update_user_is_to_close(False)
                         last_update = False
                         print("Updated status to: False")
 
@@ -62,7 +64,14 @@ def update_user_status(is_online):
     else:
         print(f"Failed to update status. Status code: {response.status_code}, Response: {response.text}")
 
+def update_user_is_to_close(is_to_close):
+    import requests
 
+    response = requests.post(url, data={'api_key': api_key, 'is_to_close': is_to_close})
+    if response.status_code == 200:
+        print("Status updated successfully!")
+    else:
+        print(f"Failed to update status. Status code: {response.status_code}, Response: {response.text}")
 if __name__ == "__main__":
     communicate_with_pico()
     # update_user_status(Trdaue)
