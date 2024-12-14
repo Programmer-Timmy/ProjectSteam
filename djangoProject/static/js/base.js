@@ -1,8 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Define the API endpoint
-    const apiUrl = `/raspberry/get_status`; //
+    const getOnlineStatusAPI = `/raspberry/get_status`; //
+    const getIsToCloseAPI = `/raspberry/get_is_to_close_status`;
 
-    let lastStatus = null; //
+    let lastOnlineStatus = null; //
 
     const createToastContainer = () => {
         let toastContainer = document.getElementById('toast-container');
@@ -52,8 +53,34 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
+const fetchIsToCloseStatus = () => {
+    fetch(getIsToCloseAPI, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+        .then(response => {
+            if(!response.ok){
+                throw new Error(`HTTP error! Status ${response.status}`);
+            }
+            return response
+        })
+        .then(data => {
+            var is_to_close = data.is_to_close
+            if(lastToCloseStatus !== null && lastToCloseStatus !== is_to_close){
+                const message = is_to_close ? "You are to close to the screen" :"You are now at a safe distance of your screen";
+                showToast(message, is_to_close)
+            }
+
+            const lastToCloseStatus = is_to_close
+        })
+        .catch(error => {
+            console.error("Error fetching user data:", error)
+        })
+}
     const fetchUserStatus = () => {
-        fetch(apiUrl, {
+        fetch(getOnlineStatusAPI, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -66,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return response.json();
         })
         .then(data => {
-            console.log("User data fetched successfully:", data);
+            var is_online = data.is_online
 
             const userInfoDiv = document.getElementById("user-info");
             if (userInfoDiv) {
@@ -81,12 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
 
-            if (lastStatus !== null && lastStatus !== data.is_online) {
-                const message = data.is_online ? "The user is now online." : "The user is now offline.";
-                showToast(message, data.is_online);
+            if (lastOnlineStatus !== null && lastOnlineStatus !== is_online) {
+                const message = is_online ? "The user is now online." : "The user is now offline.";
+                showToast(message, is_online);
             }
 
-            lastStatus = data.is_online; // Update the previous status
+            lastOnlineStatus = is_online; // Update the previous status
         })
         .catch(error => {
             console.error("Error fetching user data:", error);
@@ -95,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     fetchUserStatus();
-
+    fetchIsToCloseStatus()
 
     setInterval(fetchUserStatus, 5000); // Adjust polling interval as needed
 });

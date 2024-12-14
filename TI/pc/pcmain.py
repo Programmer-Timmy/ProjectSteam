@@ -65,4 +65,4 @@ def update_user_status(is_online):
 
 if __name__ == "__main__":
     communicate_with_pico()
-    # update_user_status(True)
+    # update_user_status(Trdaue)
