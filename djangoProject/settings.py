@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'rest_framework.authtoken',
     'dashboard.apps.DashboardConfig',
     'steam.apps.SteamConfig',
     'AuthManager.apps.AuthmanagerConfig',
@@ -83,7 +83,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 STATICFILES_DIRS = [BASE_DIR / "djangoProject/static"]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
+ASGI_APPLICATION = 'djangoProject.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {

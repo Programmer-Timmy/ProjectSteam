@@ -1,4 +1,6 @@
 import json
+
+import uuid
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
@@ -23,6 +25,7 @@ class CustomUserManager(BaseUserManager):
         user.is_superuser = True
         user.is_staff = True
         user.admin = True
+
         user.save(using=self._db)
         return user
 
@@ -42,7 +45,9 @@ class CustomUser(AbstractBaseUser):
     public_profile = models.BooleanField(default=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     opt_out = models.BooleanField(default=False)
-
+    is_online = models.BooleanField(default=False)
+    is_to_close = models.BooleanField(default=False)
+    api_key = models.CharField(default=str(uuid.uuid4()))
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
