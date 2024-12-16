@@ -47,11 +47,14 @@ def index(request):
 
     total_hours = GameSessions.objects.filter(user_game__user=request.user).aggregate(total=Sum('total_time'))['total']
 
-    hours = int(total_hours)  # Get the whole hours part
-    minutes = round((total_hours - hours) * 60)
+    if total_hours:
 
-    total_playtime = f"{hours} hours and {minutes} minutes"
+        hours = int(total_hours)  # Get the whole hours part
+        minutes = round((total_hours - hours) * 60)
 
+        total_playtime = f"{hours} hours and {minutes} minutes"
+    else:
+        total_playtime = "0 hours and 0 minutes"
 
     # get the average playtime of all the games
 
@@ -61,10 +64,14 @@ def index(request):
         average=Sum('total_time') / Count('id')
     )['average']
 
-    # calculate the average playtime in hours and minutes
-    average_hours = int(average_playtime)
-    average_minutes = round((average_playtime - average_hours) * 60)
-    average_playtime = f"{average_hours} hours and {average_minutes} minutes"
+    if average_playtime:
+        average_hours = int(average_playtime)
+        average_minutes = round((average_playtime - average_hours) * 60)
+        average_playtime = f"{average_hours} hours and {average_minutes} minutes"
+    else:
+        average_playtime = "0 hours and 0 minutes"
+
+
 
     friends = Friend.objects.filter(user=request.user, friend__opt_out=False)
     return render(request, 'dashboard/index.html', {
