@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Define the API endpoints
     const getOnlineStatusAPI = `/raspberry/get_status/`;
     const getIsToCloseAPI = `/raspberry/get_is_to_close/`;
-
+    let refreshTime = 10000
     let lastOnlineStatus = null;
     let lastToCloseStatus = null;
 
@@ -125,6 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // Call fetchStatuses at regular intervals (e.g., every 5 seconds)
-    setInterval(fetchStatuses, 5000);
+    setInterval(fetchStatuses, refreshTime);
 
 });

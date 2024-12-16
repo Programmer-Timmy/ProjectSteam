@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'games.apps.GamesConfig',
     'ajax.apps.AjaxConfig',
     'account.apps.AccountConfig',
-    'channels',
 ]
 
 MIDDLEWARE = [

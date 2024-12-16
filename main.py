@@ -1,4 +1,5 @@
-
+# TODO geef de afstand weer op een lcd scherm of het aantal vrienden.
+#  verstuur de afstand via serial. Geef dit ook weer online
 import utime
 import neopixel
 import machine
