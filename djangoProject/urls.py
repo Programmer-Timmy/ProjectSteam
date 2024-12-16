@@ -29,7 +29,6 @@ urlpatterns = [
     path('ajax/', include('ajax.urls')),
     path('account/', include('account.urls')),
     path('raspberry/', include('raspberry.urls')),
-    path('raspberry/update-status', include('raspberry.urls')),
 ]
 
 if settings.DEBUG:
