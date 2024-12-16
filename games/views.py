@@ -22,7 +22,7 @@ def fetch_steam_data(appid):
     """
 
     try:
-        app_url = f"https://store.steampowered.com/api/appdetails/?appids={appid}"
+        app_url = f"https://store.steampowered.com/api/appdetails/?appids={appid}&l=en"
         response = requests.get(app_url, timeout=10)
         response.raise_for_status()
         data = response.json()
@@ -41,7 +41,7 @@ def game(request, game_id):
     # Get the game from the database
     game = get_object_or_404(Games, appid=game_id)
 
-    game.steam_url = f"https://store.steampowered.com/app/{game.appid}"
+    game.steam_url = f"https://store.steampowered.com/app/{game.appid}&l=en"
 
     # cache the game's image, description, and short description because of the API rate limit
     if not game.steam_image or not game.description or not game.short_description:
