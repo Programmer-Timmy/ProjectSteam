@@ -1,3 +1,5 @@
+import os
+
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
@@ -13,10 +15,16 @@ from dashboard.models import UserGames, GameSessions
 def index(request):
     last_played_games = GameSessions.objects.filter(user_game__user=request.user).order_by('-start_timestamp')[:3]
     friends = Friend.objects.filter(user=request.user, friend__public_profile=True)
+    img_exists = False
+    image_path = os.path.join('media', 'profile_images', f'{request.user.id}.jpg')
+    if os.path.exists(image_path):
+        img_exists = True
+
     return render(request, 'account/index.html', {
         'page_title': 'Profile',
         'last_played_games': last_played_games,
         'friends': friends,
+        'img_exists': img_exists,
     })
 
 @login_required

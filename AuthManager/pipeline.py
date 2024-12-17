@@ -58,7 +58,7 @@ def create_or_update_user(strategy, details, backend, user=None, *args, **kwargs
     if user:
         user.steam_id = steam_id
         user.avatar_url = steam_data.get('avatarfull', '')
-        user.username = details.get('username', f'steam_{steam_id}')
+        user.steam_username = steam_data.get('personaname', '')
         user.save()
         return {'is_new': False, 'user': user}
 

@@ -1,4 +1,5 @@
 # edit account form
+import os
 
 from django import forms
 from django.contrib.auth import authenticate
@@ -12,11 +13,11 @@ class ProfileEditForm(forms.ModelForm):
     profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
     public_profile = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     show_friends = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-
+    use_steam_profile = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'profile_picture', 'public_profile', 'show_friends')
+        fields = ('username', 'profile_picture', 'public_profile', 'show_friends', 'use_steam_profile')
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -37,16 +38,23 @@ class ProfileEditForm(forms.ModelForm):
             raise ValidationError("Username is required.")
 
         if profile_picture:
-            if profile_picture.size > 2 * 1024 * 1024:
-                raise ValidationError("Profile picture is too large. Max size is 2MB.")
-            else:
-                cleaned_data['profile_picture'] = profile_picture
+            # Validate file size (max size 2MB)
+
+            if os.path.exists(self.instance.profile_picture.path):
+
+                if profile_picture.size > 2 * 1024 * 1024:
+                    raise ValidationError("Profile picture is too large. Max size is 2MB.")
 
                 # Only delete the old picture if a new one is uploaded
-                if self.instance.profile_picture and self.instance.profile_picture != profile_picture:
+                if self.instance.profile_picture:
                     self.instance.profile_picture.delete()
 
-        return cleaned_data
+                # Set the cleaned_data for the profile picture
+                self.cleaned_data['profile_picture'] = profile_picture
+            else:
+                self.cleaned_data['profile_picture'] = None
+
+        return self.cleaned_data
 
 class UserSettingsForm(forms.ModelForm):
     opt_out = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
@@ -55,9 +63,10 @@ class UserSettingsForm(forms.ModelForm):
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     steam_opt_out = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+    use_steam_profile = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     class Meta:
         model = CustomUser
-        fields = ('opt_out', 'first_name', 'last_name', 'email', 'username', 'steam_opt_out')
+        fields = ('opt_out', 'first_name', 'last_name', 'email', 'username', 'steam_opt_out', 'use_steam_profile')
 
     def save(self, commit=True):
         user = super().save(commit=False)

@@ -50,8 +50,9 @@ class CustomUser(AbstractBaseUser):
     api_key = models.CharField(default=str(uuid.uuid4()))
     steam_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
     avatar_url = models.URLField(max_length=500, null=True, blank=True)
-    steam_oauth_token = models.CharField(max_length=255, null=True, blank=True)  # Store the token here
     steam_opt_out = models.BooleanField(default=False)
+    steam_username = models.CharField(max_length=255, null=True, blank=True)
+    use_steam_profile = models.BooleanField(default=False)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'
@@ -68,6 +69,12 @@ class CustomUser(AbstractBaseUser):
     def check_password(self, raw_password):
         """Checks the given raw password against the hashed password."""
         return check_password(raw_password, self.password)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.use_steam_profile:
+            self.original_username = self.username
+            self.username = self.steam_username
 
     class Meta:
         db_table = 'users'

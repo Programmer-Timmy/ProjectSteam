@@ -1,79 +1,110 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container my-5">
-    <!-- Card Container -->
-    <div class="card p-4 shadow-lg border-0 bg-light">
-        <h2 class=" text-center mb-4">Edit Profile</h2>
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
-                    {% endfor %}
+    <div class="container my-5">
+        <!-- Card Container -->
+        <div class="card p-4 shadow-lg border-0 bg-light">
+            <h2 class=" text-center mb-4">Edit Profile</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Username Field -->
+                <div class="mb-4">
+                    <label for="username" class="form-label fw-bold">Username</label>
+                    <!-- If use_steam_profile is true, show steam_username but don't include it in the POST request -->
+                    <input type="text" class="form-control shadow-sm" id="username"
+                           {% if not user.use_steam_profile %}name="username"{% endif %}
+                           value="{% if user.use_steam_profile %}{{ user.steam_username }}{% else %}{{ user.username }}{% endif %}"
+                           {% if user.use_steam_profile %}disabled{% endif %}>
+
+                    <!-- Hidden input to ensure that the steam_username is not sent in the POST request -->
+                    {% if user.use_steam_profile %}
+                        <input type="hidden" name="username" value="{{ user.original_username }}">
+                    {% endif %}
+
+                    {% if form.username.errors %}
+                        <div class="alert alert-danger mt-2 p-2">
+                            {% for error in form.username.errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-            {% endif %}
-            
-            <!-- Username Field -->
-            <div class="mb-4">
-                <label for="username" class="form-label fw-bold">Username</label>
-                <input type="text" class="form-control shadow-sm" id="username" name="username" 
-                       value="{{ user.username }}" placeholder="Enter your username" required>
-                {% if form.username.errors %}
-                    <div class="alert alert-danger mt-2 p-2">
-                        {% for error in form.username.errors %}
-                            <p class="mb-0">{{ error }}</p>
-                        {% endfor %}
+
+                <!-- Profile Picture Upload -->
+                <div class="mb-4">
+                    <label for="profile_picture" class="form-label fw-bold ">Profile Picture</label>
+
+                    {% if not user.use_steam_profile %}
+                        <input type="file" class="form-control shadow-sm" id="profile_picture" name="profile_picture">
+                        {% if form.profile_picture.errors %}
+                            <div class="alert alert-danger mt-2 p-2">
+                                {% for error in form.profile_picture.errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="form-text">Profile picture is managed through Steam</p>
+                    {% endif %}
+                </div>
+
+                <!-- Public Profile Toggle -->
+                <div class="mb-4 form-check form-switch">
+                    <input type="checkbox" class="form-check-input" id="public_profile" name="public_profile"
+                           {% if user.public_profile %}checked{% endif %}>
+                    <label for="public_profile" class="form-check-label fw-bold ">Public Profile</label>
+                    {% if form.public_profile.errors %}
+                        <div class="alert alert-danger mt-2 p-2">
+                            {% for error in form.public_profile.errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- show friends -->
+                <div class="mb-4 form-check form-switch">
+                    <input type="checkbox" class="form-check-input" id="show_friends" name="show_friends"
+                           {% if user.show_friends %}checked{% endif %}>
+                    <label for="show_friends" class="form-check-label fw-bold ">Show Friends</label>
+                    {% if form.show_friends.errors %}
+                        <div class="alert alert-danger mt-2 p-2">
+                            {% for error in form.show_friends.errors %}
+                                <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+
+                <!-- Use Steam Profile Toggle -->
+                {% if user.steam_id %}
+                    <div class="mb-4 from-check form-switch">
+                        <input type="checkbox" class="form-check-input" id="use_steam_profile" name="use_steam_profile"
+                               {% if user.use_steam_profile %}checked{% endif %}>
+                        <label for="use_steam_profile" class="form-check-label fw-bold ">Use Steam Profile</label>
+                        {% if form.use_steam_profile.errors %}
+                            <div class="alert alert-danger mt-2 p-2">
+                                {% for error in form.use_steam_profile.errors %}
+                                    <p class="mb-0">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Save Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm px-5">Save Changes</button>
+                        </div>
                     </div>
                 {% endif %}
-            </div>
-
-            <!-- Profile Picture Upload -->
-            <div class="mb-4">
-                <label for="profile_picture" class="form-label fw-bold ">Profile Picture</label>
-                <input type="file" class="form-control shadow-sm" id="profile_picture" name="profile_picture">
-                {% if form.profile_picture.errors %}
-                    <div class="alert alert-danger mt-2 p-2">
-                        {% for error in form.profile_picture.errors %}
-                            <p class="mb-0">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Public Profile Toggle -->
-            <div class="mb-4 form-check form-switch">
-                <input type="checkbox" class="form-check-input" id="public_profile" name="public_profile" 
-                       {% if user.public_profile %}checked{% endif %}>
-                <label for="public_profile" class="form-check-label fw-bold ">Public Profile</label>
-                {% if form.public_profile.errors %}
-                    <div class="alert alert-danger mt-2 p-2">
-                        {% for error in form.public_profile.errors %}
-                            <p class="mb-0">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- show friends -->
-            <div class="mb-4 form-check form-switch">
-                <input type="checkbox" class="form-check-input" id="show_friends" name="show_friends"
-                       {% if user.show_friends %}checked{% endif %}>
-                <label for="show_friends" class="form-check-label fw-bold ">Show Friends</label>
-                {% if form.show_friends.errors %}
-                    <div class="alert alert-danger mt-2 p-2">
-                        {% for error in form.show_friends.errors %}
-                            <p class="mb-0">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-
-            <!-- Save Button -->
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg shadow-sm px-5">Save Changes</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 {% endblock %}
