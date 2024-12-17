@@ -54,10 +54,10 @@ class UserSettingsForm(forms.ModelForm):
     last_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    api_key = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    steam_opt_out = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     class Meta:
         model = CustomUser
-        fields = ('opt_out', 'first_name', 'last_name', 'email', 'username')
+        fields = ('opt_out', 'first_name', 'last_name', 'email', 'username', 'steam_opt_out')
 
     def save(self, commit=True):
         user = super().save(commit=False)

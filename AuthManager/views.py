@@ -16,6 +16,10 @@ def login_view(request):
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                # if there is no steam id and the user is not opted out, redirect to steam login
+                # if user.steam_id is None and not user.opt_out and not user.steam_opt_out:
+                #     return redirect('connect_steam')
+                # else:
                 return redirect('dashboard-index')  # Redirect to the home page or dashboard after login
             else:
                 form.add_error(None, "Invalid username or password.")
@@ -44,5 +48,19 @@ def register_view(request):
     else:
         form = CustomUserCreationForm()
 
+    # if user is not opted out, connect to steam
+
     return render(request, 'AuthManager/register.html', {'form': form})
 
+# Need Account View
+def need_account(request):
+    return render(request, 'AuthManager/need_account.html', {'title': 'Need Account'})
+
+def connect_steam(request):
+    if request.method == 'POST':
+        user = request.user
+        user.steam_opt_out = True
+        user.save()
+        return redirect('dashboard-index')
+
+    return render(request, 'AuthManager/connect_steam.html', {'title': 'Connect Steam'})

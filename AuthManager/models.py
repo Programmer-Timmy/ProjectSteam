@@ -48,6 +48,10 @@ class CustomUser(AbstractBaseUser):
     is_online = models.BooleanField(default=False)
     is_to_close = models.BooleanField(default=False)
     api_key = models.CharField(default=str(uuid.uuid4()))
+    steam_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    avatar_url = models.URLField(max_length=500, null=True, blank=True)
+    steam_oauth_token = models.CharField(max_length=255, null=True, blank=True)  # Store the token here
+    steam_opt_out = models.BooleanField(default=False)
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'username'

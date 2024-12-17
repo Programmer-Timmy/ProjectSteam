@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container text-center mt-5">
+    <h1 class="display-4 fw-bold text-dark">Connect Your Steam Account</h1>
+    <p class="lead text-muted mt-3">
+        To use your personal steam dashboard, you need to connect your Steam account. <br>
+        If you don't want to connect your Steam account, you can still use the dashboard with limited features.
+    </p>
+    <div class="mt-4">
+        <a href="{% url 'social:begin' 'steam' %}" class="btn btn-primary btn-lg">
+            Connect Steam
+        </a>
+        <form method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary btn-lg" value="skip" name="skip">
+                Skip
+            </button>
+        </form>
+    </div>
+    <div class="mt-5">
+        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/753/header.jpg"
+             alt="Steam Banner"
+             class="img-fluid rounded shadow">
+    </div>
+</div>
+
+{% endblock %}

@@ -15,28 +15,6 @@
     <script type="text/javascript" src="{% static 'js/dashboard/charts.js' %}"></script>
     <div class="px-md-5 px-3">
         <h1 class="text-center mb-4">Welcome to your dashboard {{ user.username }}</h1>
-        <div class="alert alert-warning text-center" role="alert">
-            <div>
-                <h2>Note from Cosmic Pioneer</h2>
-                <p>
-                    The top 10 games are here, but the rest? Well... let’s just say my FICSIT factory’s power grid
-                    decided to take a vacation, and I've been busy fixing it.
-                    Between optimizing conveyor belts and making sure I don’t accidentally blow up another part of the
-                    factory, the rest of the project is still "under construction."
-                </p>
-                <p>
-                    This *FICSIT-grade* project comes with a live warranty: operational as long as I can avoid another
-                    meltdown or get distracted by yet another resource shortage. Expect delays if I get caught in a
-                    spiderweb of conveyor belts or run out of materials while trying to automate this thing.
-                </p>
-
-                <p>
-                    Am i bored? No, I'm just... busy. Yeah, busy. I'm not playing games, I'm working on the factory. The
-                    factory must grow.
-                </p>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
         {% if user.opt_out %}
             <div class="alert alert-danger text-center" role="alert">
                 <div class="row">
@@ -60,8 +38,28 @@
             </div>
         {% endif %}
 
+        {%  if not user.steam_id %}
+            <div class="alert alert-warning text-center" role="alert">
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Connect Steam</h2>
+                    </div>
+                    <div class="col-4 text end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    To use the dashboard, you need to connect your Steam account. If you don't want to connect your Steam
+                    account, you can still use the dashboard with limited features.
+                </p>
+                <a href="{% url 'social:begin' 'steam' %}" class="btn btn-primary">
+                    Connect Steam
+                </a>
+            </div>
+        {% endif %}
 
-        {% if not user.opt_out %}
+        {% if not user.opt_out and user.steam_id %}
             <wrapper>
                 <h2 class="text-center mb-2">Playtime Statistics</h2>
                 <div class="row mb-4">

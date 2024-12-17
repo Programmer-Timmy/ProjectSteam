@@ -27,6 +27,8 @@
                     <div class="col-auto text-end d-flex flex-column">
                         {% if user.opt_out %}
                             <span class="badge bg-danger">Opted Out</span>
+                        {% elif not user.steam_id %}
+                            <span class="badge bg-danger">No Steam Account</span>
                         {% elif user.public_profile %}
                             <span class="badge bg-success">Public Profile</span>
                         {% else %}
@@ -49,7 +51,7 @@
 
     <div class="container my-4">
 
-        {% if user.opt_out %}
+        {% if user.opt_out%}
             <div class="alert alert-danger text-center" role="alert">
                 <div class="row">
                     <div class="col-4"></div>
@@ -70,6 +72,27 @@
                     Update Settings
                 </a>
             </div>
+        {% elif not user.steam_id %}
+
+            <div class="alert alert-warning text-center" role="alert">
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Connect Your Steam Account</h2>
+                    </div>
+                    <div class="col-4 text end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    To use your personal steam dashboard, you need to connect your Steam account. <br>
+                    If you don't want to connect your Steam account, you can still use the dashboard with limited features.
+                </p>
+                <a href="{% url 'social:begin' 'steam' %}" class="btn btn-primary">
+                    Connect Steam
+                </a>
+            </div>
+
         {% else %}
             <div class="row g-4">
                 <!-- Last Played Games Section -->
