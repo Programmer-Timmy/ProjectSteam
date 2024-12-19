@@ -231,7 +231,9 @@
             <div class="row">
                 <div class="col-12">
                     <h2>Last played games</h2>
-                    <div class="row flex-nowrap overflow-auto">
+                    <div class="row flex-nowrap" 
+                         style="overflow-y: hidden;">
+                         
                         {% for game in last_played_games %}
                             <div class="col-4 col-xl-2">
                                 <div class="card mb-4 shadow-sm h-100">
@@ -280,10 +282,12 @@
         {% endif %}
     </div>
     <div class="bg-light-subtle px-5 mt-5 py-3">
+        <h1 class="text-center mb-4">Global dashboard</h1>
         <div class="row">
             <div class="col-12">
                 <h2>Most played games</h2>
-                <div class="row flex-nowrap overflow-auto">
+                <div class="row flex-nowrap" 
+                     style="overflow-y: hidden;">
 
                     {% for game in top_10_games %}
                         <div class="col-4">
@@ -333,7 +337,8 @@
                 </div>
                 <div class="col-12 mt-5">
                     <h2>Best reviewed games</h2>
-                    <div class="row flex-nowrap overflow-auto">
+                    <div class="row flex-nowrap" 
+                         style="overflow-y: hidden;">
 
                         {% for game in best_reviewed_games %}
                             <div class="col-4">
