@@ -8,7 +8,6 @@ import requests
 load_dotenv()
 
 STEAM_API_KEY = os.getenv('STEAM_API_KEY')
-print('STEAM_API_KEY:', STEAM_API_KEY)
 
 def fetch_steam_data(steam_id):
     """Fetch the user's Steam profile data using the Steam Web API."""

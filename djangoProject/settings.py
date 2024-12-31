@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'ajax.apps.AjaxConfig',
     'account.apps.AccountConfig',
     'social_django',
+    'daily_check',
 ]
 
 MIDDLEWARE = [

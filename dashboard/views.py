@@ -20,12 +20,15 @@ from dashboard.models import Games, GameCategoriesLink, UserGames, GameSessions
 def index(request):
     # get the top 10 avarage playtime of the games
 
-    top_10_games = Games.objects.order_by('-average_playtime')[:10]
+    top_10_games = Games.objects.order_by('-average_playtime').filter(average_playtime__isnull=False)[:10]
     from django.db.models import F, FloatField
 
     best_reviewed_games = (
         Games.objects.annotate(
-            average_rating=F('positive_ratings') / (F('negative_ratings') + 1)  # Prevent division by zero
+            average_rating=F('positive_ratings') / (F('negative_ratings') + 1),  # Prevent division by zero
+
+        ).filter(
+            average_rating__isnull=False  # Filter out games with no ratings
         )
         .order_by('-average_rating')[:10]  # Sort by highest average
     )
