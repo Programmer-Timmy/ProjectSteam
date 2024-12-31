@@ -257,7 +257,7 @@
                                             <p class="card-text text-truncate"
                                                style="max-height: 60px; overflow: hidden;">
                                                 {% if game.end_timestamp %}
-                                                    {{ game.end_timestamp|date:"F j, Y H:i" }}
+                                                    {{ game.end_timestamp|date:"F j, Y" }}
                                                 {% else %}
                                                     <span class="text-success">Ongoing</span>
                                                 {% endif %}
