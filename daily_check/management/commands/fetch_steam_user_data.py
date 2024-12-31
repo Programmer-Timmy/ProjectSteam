@@ -64,6 +64,7 @@ class Command(BaseCommand):
                         Games.objects.create(
                             appid=game['appid'],
                             name=game['name'],
+                            steam_image=f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{game['appid']}/header.jpg"
                         )
 
                     if not user.user_games.filter(app__appid=game['appid']).exists():
