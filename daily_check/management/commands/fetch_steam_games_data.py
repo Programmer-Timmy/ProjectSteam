@@ -82,6 +82,7 @@ class Command(BaseCommand):
                     game_obj.owners = game['owners']
                     game_obj.price = price
                     game_obj.save()
+
             except Exception as e:
                 self.stdout.write(f"Error processing game {game['name']}: {e}")
                 continue
@@ -89,4 +90,4 @@ class Command(BaseCommand):
             completed += 1
             self.stdout.write(f"Processing games... {completed}/{total}", ending='\r')
 
-        self.stdout.write(self.style.SUCCESS(f"Processed {total} games successfully.", ending='\n'))
+        self.stdout.write(self.style.SUCCESS(f"Processed {total} games successfully."))
