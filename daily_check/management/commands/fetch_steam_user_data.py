@@ -8,6 +8,7 @@ from datetime import timedelta
 import requests
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.utils import timezone
 from dotenv import load_dotenv
 
@@ -35,6 +36,10 @@ class Command(BaseCommand):
         for user in users:
             # getting last palayed games in the last 2 weeks form the databavse
             last_played_games_in_db = GameSessions.objects.filter(user_game__user=user, start_timestamp__gte=timezone.now() - timedelta(weeks=2)).order_by('-start_timestamp')
+
+            last_played_games_in_db = last_played_games_in_db.values('user_game__app__appid').annotate(total_time=Sum('total_time'))
+
+            print(last_played_games_in_db)
 
             url = f'https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key={STEAM_API_KEY}&steamid={user.steam_id}'
 
@@ -72,14 +77,15 @@ class Command(BaseCommand):
                     game_in_db = last_played_games_in_db.filter(user_game__app__appid=game['appid']).first()
 
                     if game_in_db:
-                        remaining_time = game['playtime_2weeks'] - game_in_db.total_time
+                        game['playtime_2weeks'] = round(game['playtime_2weeks'] / 60, 2)
+                        remaining_time = game['playtime_2weeks'] - game_in_db['total_time']
+                        print(remaining_time)
                         if remaining_time > 0:
-                            hours_played = round(remaining_time / 60, 2)
                             GameSessions.objects.create(
                                 user_game=user.user_games.get(app__appid=game['appid']),
                                 start_timestamp=timezone.now(),
                                 end_timestamp=timezone.now(),
-                                total_time=hours_played,
+                                total_time=remaining_time,
                                 ongoing=False
                             )
                     else:
