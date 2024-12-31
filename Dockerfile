@@ -21,10 +21,18 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Copy cron job files
 COPY ./cronjobs/fetch_steam_user_data /etc/cron.d/fetch_steam_user_data
-RUN chmod 0644 /etc/cron.d/fetch_steam_user_data
+COPY ./cronjobs/fetch_steam_games_data /etc/cron.d/fetch_steam_games_data
+
+# Set correct permissions for the cron job files
+RUN chmod 0644 /etc/cron.d/fetch_steam_user_data /etc/cron.d/fetch_steam_games_data
+
+# Add the cron jobs to the crontab and create the log directory
 RUN crontab /etc/cron.d/fetch_steam_user_data \
-    && mkdir /var/log/cron
+    && crontab /etc/cron.d/fetch_steam_games_data \
+    && mkdir -p /var/log/cron
+
 
 EXPOSE 8000
 
