@@ -1,1 +1,0 @@
-0 0 * * * root /usr/local/bin/python /app/manage.py fetch_steam_user_data >> /var/log/cron.log 2>&1

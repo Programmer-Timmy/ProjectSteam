@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install necessary dependencies for PostgreSQL
+# Install necessary dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
        gcc \
@@ -22,18 +22,22 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Copy cron job files
-COPY ./cronjobs/fetch_steam_user_data /etc/cron.d/fetch_steam_user_data
-COPY ./cronjobs/fetch_steam_games_data /etc/cron.d/fetch_steam_games_data
+COPY ./cronjobs/daily_steam_update /etc/cron.d/daily_steam_update
 
-# Set correct permissions for the cron job files
-RUN chmod 0644 /etc/cron.d/fetch_steam_user_data /etc/cron.d/fetch_steam_games_data
+# Set correct permissions for cron job files
+RUN chmod 0644 /etc/cron.d/daily_steam_update
 
-# Add the cron jobs to the crontab and create the log directory
-RUN crontab /etc/cron.d/fetch_steam_user_data \
-    && crontab /etc/cron.d/fetch_steam_games_data \
-    && mkdir -p /var/log/cron
+# Apply cron job files
+RUN crontab /etc/cron.d/daily_steam_update
 
+# reload cron service
+RUN service cron reload
 
+# Create log directory for cron
+RUN mkdir -p /var/log/cron
+
+# Expose the Django app port
 EXPOSE 8000
 
-CMD ["sh", "-c", "cron && python manage.py runserver 0.0.0.0:8000"]
+# Run cron in the background and Django server in the foreground
+CMD ["sh", "-c", "cron -f & python manage.py runserver 0.0.0.0:8000"]
