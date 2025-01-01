@@ -6,6 +6,21 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 
 class CustomUserCreationForm(UserCreationForm):
+    """
+    A form that creates a user, with no privileges, from the given email and password.
+
+    Attributes:
+    - first_name: The user's first name.
+    - last_name: The user's last name.
+    - email: The user's email address.
+    - username: The user's username.
+    - opt_out: A boolean field to opt out of emails.
+    - password1: The user's password.
+    - password2: The user's password confirmation.
+
+    Methods:
+    - save: Save the user to the database.
+    """
     first_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
@@ -26,6 +41,18 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomLoginForm(forms.Form):
+    """
+    A form that authenticates a user based on the given username and password.
+
+    Attributes:
+    - username: The user's username.
+    - password: The user's password.
+
+    Methods:
+    - clean: Validate the username and
+
+    password and authenticate the user.
+    """
     username = forms.CharField(max_length=255)
     password = forms.CharField(widget=forms.PasswordInput)
 

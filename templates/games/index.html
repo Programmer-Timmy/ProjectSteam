@@ -1,6 +1,19 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
+    <div id="loading" style="display: none" class="text-center mt-auto">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="text-center mt-3">
+            <p id="loading-message">Loading games...</p>
+        </div>
+        <div class="progress mt-3" style="height: 20px; width: 80%; margin: 0 auto;">
+            <div id="loading-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                 style="width: 0%"></div>
+        </div>
+    </div>
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-4">
@@ -9,12 +22,22 @@
                 <h1 class="mb-4">Games</h1>
             </div>
             <div class="col-md-4">
-                <input type="search" class="form-control" name="search" placeholder="Search games..." id="search">
+                <input type="search" class="form-control" name="search" placeholder="Search games..."
+                       value="{{ search }}" id="search" autocomplete="off">
             </div>
         </div>
 
         <div class="row">
+
             <div class="col-12" id="games">
+                {% if search %}
+                    <div class="alert alert-warning text-center" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> Some content, such as images, descriptions, or other
+                        data,
+                        may be
+                        unavailable due to API rate limits or restrictions.
+                    </div>
+                {% endif %}
                 {% if games %}
                     <div class="row">
                         {% for game in games %}
@@ -41,8 +64,8 @@
                                         {% endif %}
                                         <div class="mt-auto">
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <a href="{% url 'game' game.appid %}"
-                                                   class="btn btn-sm btn-primary">
+                                                <a href="{% url 'game' game.appid %}{% if search %}?search={{ search }}&limit={{ limit }}{% endif %}"
+                                                   class="btn btn-sm btn-primary show-loading">
                                                     View
                                                 </a>
                                                 <div class="text-end">
@@ -58,58 +81,28 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div class="alert alert-info">No games found.</div>
+                    <div class="alert alert-info text-center d-flex flex-column align-items-center">
+                        <i class="bi bi-emoji-frown display-1"></i>
+                        <span class="pb-3">No games found. Try a different search.</span>
+                        <a href="{% url 'games-index' %}" class="btn btn-primary">Clear Search</a>
+                    </div>
                 {% endif %}
             </div>
-            <div class="text-center pb-4">
-                <button class="btn btn-primary" id="load-more">
-                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    Load More
-                </button>
-            </div>
+
+            {% if games and games|length >= limit %}
+                <div class="text-center pb-4">
+                    <button class="btn btn-primary" id="load-more">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Load More
+                    </button>
+                </div>
+            {% endif %}
         </div>
     </div>
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock %}
 
-    <script>
-        let limit = 30;
-        const search = $('#search');
-        const loadMore = $('#load-more');
-
-        function getGames(searchValue) {
-            $.ajax({
-                url: "{% url 'get_games' %}",
-                type: "get",
-                data: {
-                    csrfmiddlewaretoken: "{{ csrf_token }}",
-                    search: searchValue,
-                    order_by: 'appid',
-                    order: 'asc',
-                    limit: limit
-                },
-                success: function (data) {
-                    $('#games').html(data);
-                    loadMore.find('span').addClass('d-none')
-
-                    const games = $('#games .card');
-                    if (games.length < limit) {
-                        loadMore.addClass('d-none');
-                    } else {
-                        loadMore.removeClass('d-none');
-                    }
-                }
-            });
-        }
-
-        search.on('input', function () {
-            const searchValue = search.val();
-            limit = 30;
-            getGames(searchValue);
-        });
-
-        loadMore.on('click', function () {
-            limit += 30;
-            loadMore.find('span').removeClass('d-none');
-            getGames(search.val());
-        });
-    </script>
+{% block scripts %}
+    <script src="{% static 'js/games/loading.js' %}"></script>
+    <script src="{% static 'js/games/search.js' %}"></script>
 {% endblock %}

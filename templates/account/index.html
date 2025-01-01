@@ -25,6 +25,15 @@
                         <h1 class="fw-bold">{{ user.username }}</h1>
                         <p class="mb-0">Member Since: {{ user.created_at|date:"F j, Y" }}</p>
                     </div>
+                <!-- social media links -->
+                    <div class="col-auto text-end">
+                        {% if not user.steam_opt_out and user.steam_id %}
+                            <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}"
+                               class="p-2">
+                                <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30" width="30">
+                            </a>
+                        {% endif %}
+                    </div>
                     <!-- Profile Status -->
                     <div class="col-auto text-end d-flex flex-column">
                         {% if user.opt_out %}

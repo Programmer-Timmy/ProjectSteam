@@ -9,6 +9,20 @@ from django.core.exceptions import ValidationError
 from AuthManager.models import CustomUser
 
 class ProfileEditForm(forms.ModelForm):
+    """
+    Form for editing the user's profile
+
+    Fields:
+    - username: The user's username
+    - profile_picture: The user's profile picture
+    - public_profile: Whether the user's profile is public
+    - show_friends: Whether the user's friends are shown
+    - use_steam_profile: Whether the user's Steam profile is used
+
+    Methods:
+    - save: Save the form data to the user model
+    - clean: Validate the form data
+    """
     username = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     profile_picture = forms.ImageField(required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
     public_profile = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
@@ -57,6 +71,21 @@ class ProfileEditForm(forms.ModelForm):
         return self.cleaned_data
 
 class UserSettingsForm(forms.ModelForm):
+    """
+    Form for editing the user's settings
+
+    Fields:
+    - opt_out: Whether the user has opted out
+    - first_name: The user's first name
+    - last_name: The user's last name
+    - email: The user's email
+    - username: The user's username
+    - steam_opt_out: Whether the user has opted out of Steam tracking
+    - use_steam_profile: Whether the user's Steam profile is used
+
+    Methods:
+    - save: Save the form data to the user model
+    """
     opt_out = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
     first_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
     last_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -75,6 +104,18 @@ class UserSettingsForm(forms.ModelForm):
         return user
 
 class UserChangePasswordForm(forms.ModelForm):
+    """
+    Form for changing the user's password
+
+    Fields:
+    - old_password: The user's old password
+    - new_password: The user's new password
+    - confirm_password: The user's new password confirmation
+
+    Methods:
+    - clean: Validate the form data
+    - save: Save the new password to the user model
+    """
     old_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     new_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}))

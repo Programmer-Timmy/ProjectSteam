@@ -8,7 +8,29 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
+    """
+    Custom user manager where email is the unique identifiers
+    for authentication instead of usernames.
+
+    Methods:
+    - create_user: Create a new user.
+    - create_superuser: Create a new superuser.
+    """
     def create_user(self, username, email, first_name, last_name, password=None, **extra_fields):
+        """
+        Create and return a regular user with an email and password.
+
+        Args:
+        - username: The user's username.
+        - email: The user's email address.
+        - first_name: The user's first name.
+        - last_name: The user's last name.
+        - password: The user's password.
+        - extra_fields: Additional fields to save to the user.
+
+        Returns:
+        - user: The newly created user.
+        """
         if not email:
             raise ValueError(_('Users must have an email address'))
         if not username:
@@ -21,6 +43,20 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, first_name, last_name, password=None, **extra_fields):
+        """
+        Create and return a superuser with an email and password.
+
+        Args:
+        - username: The user's username.
+        - email: The user's email address.
+        - first_name: The user's first name.
+        - last_name: The user's last name.
+        - password: The user's password.
+        - extra_fields: Additional fields to save to the user.
+
+        Returns:
+        - user: The newly created superuser.
+        """
         user = self.create_user(username, email, first_name, last_name, password, **extra_fields)
         user.is_superuser = True
         user.is_staff = True

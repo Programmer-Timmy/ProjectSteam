@@ -1,9 +1,13 @@
 import os
+
 from django.shortcuts import redirect
 from dotenv import load_dotenv
 from social_core.exceptions import AuthException
 from openid.consumer.consumer import SuccessResponse
 import requests
+from social_django.models import UserSocialAuth
+
+from controlers.User import UserManager
 
 load_dotenv()
 
@@ -28,6 +32,8 @@ def fetch_steam_data(steam_id):
 
 
 def create_or_update_user(strategy, details, backend, user=None, *args, **kwargs):
+    is_new = False
+
     extra_data = kwargs.get('response', None)
 
     if not extra_data:
@@ -55,10 +61,30 @@ def create_or_update_user(strategy, details, backend, user=None, *args, **kwargs
 
     # Save or update the user with the Steam data
     if user:
+        print("Updating user with Steam data")
+        if steam_id != user.steam_id:
+            is_new = True
+
         user.steam_id = steam_id
         user.avatar_url = steam_data.get('avatarfull', '')
         user.steam_username = steam_data.get('personaname', '')
         user.save()
+
+        if is_new:
+            if not UserSocialAuth.objects.filter(user=user, provider='steam').exists():
+                UserSocialAuth.objects.create(
+                    user=user,
+                    provider='steam',
+                    uid=user.steam_id  # Make sure `steam_id` is populated
+                )
+
+            try:
+                UserManager().update_steam_games(user)
+                return redirect('steam_connected')
+            except Exception as e:
+                print(f"Error updating Steam games for user {user}: {e}")
+
+
         return {'is_new': False, 'user': user}
 
     return redirect('need_account')

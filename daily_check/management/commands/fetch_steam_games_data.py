@@ -12,7 +12,9 @@ from django.db.models import Sum
 from django.utils import timezone
 from dotenv import load_dotenv
 
-from dashboard.models import GameSessions, Games
+from dashboard.models import GameSessions
+from games.models import Games
+from controlers.api.SteamSpyApi import SteamSpyApi
 
 User = get_user_model()
 
@@ -26,31 +28,20 @@ class Command(BaseCommand):
         self.stdout.write("Fetching data from SteamSPpy API...")
         page = 1
         data = {}
+
         while True:
-            try:
-                url = f"https://steamspy.com/api.php?request=all&page={page}"
-                response = requests.get(url)
-                if response.status_code == 500:
-                    break
-
-                response.raise_for_status()
-                page_data = response.json()
-
-                if not page_data:
-                    break
-
-                data.update(response.json())
+            api_data = SteamSpyApi.get_steam_games(page)
+            if api_data:
+                data.update(api_data)
                 page += 1
+            else:
+                break
 
-            except requests.exceptions.RequestException as e:
-                self.stdout.write(f"Error fetching Steam data: {e}")
-                return
-
-            if not data:
-                self.stdout.write(self.style.WARNING("No data found."))
-                return
-
-        self.stdout.write(self.style.SUCCESS("Data fetched successfully."))
+        if not data:
+            self.stdout.write(self.style.WARNING("No data found."))
+            return
+        else:
+            self.stdout.write(self.style.SUCCESS("Data fetched successfully."))
 
         total = len(data)
         completed = 0

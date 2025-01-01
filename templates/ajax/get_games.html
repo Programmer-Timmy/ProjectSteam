@@ -29,8 +29,8 @@
                         {% endif %}
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between align-items-center">
-                                <a href="{% url 'game' game.appid %}"
-                                   class="btn btn-sm btn-primary">
+                                <a href="{% url 'game' game.appid %}?search={{ search }}&limit={{ limit }}"
+                                   class="btn btn-sm btn-primary show-loading">
                                     View
                                 </a>
                                 <div class="text-end">
