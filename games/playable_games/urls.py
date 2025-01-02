@@ -1,0 +1,13 @@
+from tkinter import image_names
+
+from django.urls import path, include
+
+from . import views
+
+app_name = 'playable_games'
+
+urlpatterns = [
+    path("", views.index, name="games-index"),
+    path("satisfactory_api/", include('games.playable_games.satisfactory_api.urls'), name="satisfactory_api"),
+
+]

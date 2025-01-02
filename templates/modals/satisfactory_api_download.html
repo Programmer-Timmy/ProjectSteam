@@ -1,0 +1,80 @@
+<div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-success" id="downloadModalLabel">Download Save Game</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="game_session" class="form-label">Game Save to Download</label>
+                        <select class="form-select" id="game_session" name="game_session" required>
+                            <option value="" disabled selected>Select a Game Save</option>
+                            {% for game_session in saveGames %}
+                                <option value="{{ game_session.saveName }}">{{ game_session.saveName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span id="button-text">Download</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var downloadButton = $('#downloadModal button[type="submit"]');
+
+    $('#downloadModal form').submit(function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        downloadButton.prop('disabled', true);
+        downloadButton.find('#button-text').text('Downloading...');
+        const saveGame = $('#game_session').val();
+
+        if (!saveGame) {
+            alert('Please select a save game to download.');
+            downloadButton.prop('disabled', false);
+            downloadButton.find('#button-text').text('Download');
+            return;
+        }
+        const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+        downloadButton.find('.spinner-border').removeClass('d-none');
+        const url = `../download/{{ id }}/${saveGame}/?csrfmiddlewaretoken=${csrfToken}`;
+
+        $.get(url, function (data, textStatus, xhr) {
+            if (xhr.status === 200) {
+                const blob = new Blob([data], {type: 'application/octet-stream'});
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = saveGame + '.sav';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                // Close the modal
+                $('#downloadModal').modal('hide');
+
+            } else {
+                // Handle errors
+                alert('Error: ' + data.message);
+            }
+
+            downloadButton.html('Download');
+            downloadButton.prop('disabled', false);
+            downloadButton.find('.spinner-border').addClass('d-none');
+        }).fail(function () {
+            alert('An error occurred while downloading the save game.');
+            downloadButton.html('Download');
+            downloadButton.prop('disabled', false);
+            downloadButton.find('.spinner-border').addClass('d-none');
+        });
+    });
+</script>

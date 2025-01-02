@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-2">
+        <div class="row text-end items align-items-end mb-4">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="text-center">
+                    <h1 class="display-4">Satisfactory API</h1>
+                    <p class="lead text-muted m-0">See your factory's dedicated server status and more.</p>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'playable_games:satisfactory_api:index' %}" class="btn btn-outline-primary"><i
+                        class="bi bi-arrow-left"></i> Go Back</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Server Status -->
+            <div class="col-md-3">
+                <div class="card shadow-sm bg-dark border-dark shadow-sm">
+                    <div class="card-body text-center d-flex align-items-center">
+                        {% if online %}
+                            <div class="online rounded-circle bg-success text-white d-flex justify-content-center align-items-center outside-blink"
+                                 style="width: 60px; height: 60px;">
+                            </div>
+                            <h5 class="card-title text-success ms-3 mb-0">Online</h5>
+                        {% else %}
+                            <div class="offline rounded-circle bg-danger text-white d-flex justify-content-center align-items-center outside-blink"
+                                 style="width: 60px; height: 60px;">
+                            </div>
+                            <h5 class="card-title text-danger ms-3 mb-0">Offline</h5>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card shadow-sm bg-dark border-dark shadow-sm mt-4">
+                    <div class="card-body">
+                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                data-bs-target="#downloadModal">
+                            Download Save Game
+                        </button>
+                        <button type="button" class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#advancedSettingsModal">
+                            Advanced Game Settings
+                        </button>
+                        <button type="button" class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#settingsModal">
+                            Change Settings
+                        </button>
+                        <button type="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#shutdownModal">
+                            Shutdown Server
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Information -->
+            <div class="col-md-9">
+                <div class="card shadow-sm bg-dark border-dark text-light h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Dedicated Server Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Active Save Game:</dt>
+                            <dd class="col-sm-8">{{ server_data.activeSessionName }}</dd>
+
+                            <dt class="col-sm-4">Player Count:</dt>
+                            <dd class="col-sm-8">{{ server_data.numConnectedPlayers }}
+                                / {{ server_data.playerLimit }}</dd>
+
+                            <dt class="col-sm-4">Tier:</dt>
+                            <dd class="col-sm-8">{{ server_data.techTier }}</dd>
+
+                            <dt class="col-sm-4">Game Phase:</dt>
+                            <dd class="col-sm-8">{{ server_data.gamePhase }}</dd>
+
+                            <dt class="col-sm-4">Is Game Running:</dt>
+                            <dd class="col-sm-8">
+                                {% if server_data.isGamePaused %}
+                                    <span class="text-danger">No</span>
+
+                                {% else %}
+                                    <span class="text-success">Yes</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-4">Total Duration:</dt>
+                            <dd class="col-sm-8">{{ server_data.totalGameDuration }}</dd>
+
+                            <dt class="col-sm-4">Tick Rate:</dt>
+                            <dd class="col-sm-8">{{ server_data.averageTickRate }} ticks/s</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'modals/satisfactory_api_download.html' %}
+    <style>
+        .outside-blink {
+            position: relative;
+            display: inline-block;
+            color: #fff; /* Text color */
+            font-size: 24px; /* Adjust as needed */
+            font-weight: bold; /* Ensure visibility */
+        }
+
+        .outside-blink::before {
+            border-radius: 50%; /* Circle */
+            content: "";
+            position: absolute;
+            top: -0px;
+            left: -0px;
+            right: -0px;
+            bottom: -0px;
+        }
+
+        .online.outside-blink::before {
+            animation: blink-online 3s infinite;
+        }
+
+        .offline.outside-blink::before {
+            animation: blink-offline 3s infinite;
+        }
+
+        @keyframes blink-online {
+            0% {
+                opacity: 1;
+                box-shadow: 0 0 10px 5px rgba(25, 135, 84, 0.5);
+            }
+            45% {
+                opacity: 0;
+                box-shadow: 0 0 20px 10px rgba(25, 135, 84, 0.2);
+            }
+            90% {
+                opacity: 0;
+                box-shadow: none;
+            }
+            100% {
+                opacity: 1;
+                box-shadow: none;
+            }
+        }
+
+        @keyframes blink-offline {
+            0% {
+                opacity: 1;
+                box-shadow: 0 0 10px 5px rgba(220, 53, 69, 0.5);
+            }
+            45% {
+                opacity: 0;
+                box-shadow: 0 0 20px 10px rgba(220, 53, 69, 0.2);
+            }
+            90% {
+                opacity: 0;
+                box-shadow: none;
+            }
+            100% {
+                opacity: 1;
+                box-shadow: none;
+            }
+        }
+    </style>
+{% endblock %}

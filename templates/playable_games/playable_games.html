@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container mt-2">
+        <div class="text-center">
+            <h1 class="display-4">Playable Games</h1>
+            <p class="lead text-muted">Explore and enjoy your library of amazing games.</p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4 pb-5">
+            {% for game in games %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ game.image_url }}" class="card-img-top object-fit-cover" alt="{{ game.name }}" width="100%" height="225">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ game.name }}</h5>
+                            <p class="card-text">{{ game.description }}</p>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <span class="badge bg-primary">{{ game.genre }}</span>
+                            <a href="{% url game.url %}" class="btn btn-outline-primary btn-sm">Play Now</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
