@@ -5,17 +5,12 @@ from django.http import JsonResponse, FileResponse
 from django.shortcuts import render, redirect
 from dotenv import load_dotenv
 from satisfactory_api_client import SatisfactoryAPI, APIError
-from satisfactory_api_client.data import MinimumPrivilegeLevel
+from satisfactory_api_client.data import MinimumPrivilegeLevel, ServerOptions, AdvancedGameSettings
 
-from djangoProject import settings
 from games.playable_games.satisfactory_api.models import SatisfactoryApi
 from games.playable_games.satisfactory_api.utils import show_page_with_error, encrypt_password, get_user_servers, \
-    login_api, check_if_exist_and_owner
-
-load_dotenv()
-hash_key = os.getenv('HASH_KEY')
-hash_salt = os.getenv('HASH_SALT')
-
+    login_api, check_if_exist_and_owner, server_is_online, get_downloadable_game_saves, reformat_server_options, \
+    reformat_advanced_game_settings
 
 def satisfactory_api(request):
     if request.method == 'GET' and 'delete' in request.GET:
@@ -77,18 +72,184 @@ def delete_satisfactory_api(request, id):
             if is_owner:
                 SatisfactoryApi.objects.get(id=id).delete()
 
-        return redirect('playable_games:satisfactory_api')
+        return redirect('playable_games:satisfactory_api:index')
 
 
 def satisfactory_api_details(request, id):
     if check_if_exist_and_owner(id, request.user):
-        if request.method == 'POST' and request.POST.get('game_session'):
-            return redirect('playable_games:satisfactory_api:satisfactory_api_download', id=id, save_name=request.POST.get('game_session'))
 
+        if server_is_online(id):
+            api_data = SatisfactoryApi.objects.get(id=id)
+            api = SatisfactoryAPI(api_data.host, api_data.port)
+            login_api(api, api_data.password_hash)
+
+            health = api.health_check()
+            server_data = api.query_server_state().data['serverGameState']
+            server_data['gamePhase'] = server_data['gamePhase'].split('/')[-1].split('.')[0].replace('_',
+                                                                                                     ' ').replace(
+                'GP ', '')
+            server_data['totalGameDuration'] = str(server_data['totalGameDuration'] // 3600) + ' hours and ' + str(
+                round(server_data['totalGameDuration'] % 3600 / 60)) + ' minutes'
+            server_data['averageTickRate'] = str(round(server_data['averageTickRate']))
+
+            downloadable_game_saves = get_downloadable_game_saves(api)
+            server_options = reformat_server_options(api.get_server_options().data)
+            advanced_game_settings = reformat_advanced_game_settings(api.get_advanced_game_settings().data)
+            online = health.data.get('health', False)
+        else:
+            online = False
+            server_data = {
+                "activeSessionName": "No active session",
+                "numConnectedPlayers": 0,
+                "playerLimit": 4,
+                "techTier": "Unknown",
+                "gamePhase": "Unknown",
+                "isGameRunning": False,
+                "IsGamePaused": True,
+                "totalGameDuration": "Unknown",
+                "averageTickRate": "Unknown"
+            }
+            downloadable_game_saves = None
+            server_options = None
+            advanced_game_settings = None
+
+        return render(request, 'playable_games/satisfactory_api/dashboard.html', {
+            'page_title': 'Satisfactory API Dashboard',
+            'online': online,
+            'server_data': server_data,
+            'saveGames': downloadable_game_saves,
+            'serverOptions': server_options,
+            'advancedGameSettings': advanced_game_settings,
+            'id': id
+        })
+
+    return redirect('playable_games:satisfactory_api')
+
+
+def download_satisfactory_api(request, id, save_name):
+    # check if send by ajax
+    if not request.method == 'GET':
+        return render(request, '404.html', status=404)
+
+    if check_if_exist_and_owner(id, request.user) and server_is_online(id):
         api_data = SatisfactoryApi.objects.get(id=id)
         api = SatisfactoryAPI(api_data.host, api_data.port)
         login_api(api, api_data.password_hash)
 
+        saveGame = api.download_save_game(save_name)
+
+        if saveGame:
+            return FileResponse(io.BytesIO(saveGame.data), as_attachment=True, filename=save_name + '.sav')
+        else:
+            # django 404 page
+            return render(request, '404.html', status=404)
+
+    return redirect('playable_games:satisfactory_api')
+
+def update_satisfactory_api(request, id):
+    if check_if_exist_and_owner(id, request.user) and server_is_online(id):
+        if request.method == 'POST':
+            api_data = SatisfactoryApi.objects.get(id=id)
+            api = SatisfactoryAPI(api_data.host, api_data.port)
+            login_api(api, api_data.password_hash)
+
+            try:
+                serverOptions = ServerOptions(
+                    DSAutoPause=request.POST.get('FG.DSAutoPause') == 'on',
+                    DSAutoSaveOnDisconnect=request.POST.get('FG.DSAutoSaveOnDisconnect') == 'on',
+                    AutosaveInterval=int(request.POST.get('FG.AutosaveInterval')) * 60,
+                    ServerRestartTimeSlot=request.POST.get('FG.ServerRestartTimeSlot').replace(":", "."),
+                    SendGameplayData=request.POST.get('FG.SendGameplayData') == 'on',
+                    NetworkQuality=int(request.POST.get('FG.NetworkQuality'))
+                )
+                data = api.apply_server_options(serverOptions)
+                if not data.success:
+                    return JsonResponse({'status': 'failed', 'message': 'Failed to update server settings'}, status=400)
+
+                return JsonResponse({'status': 'success', 'message': 'Server settings updated'}, status=200)
+            except APIError as e:
+                return JsonResponse({'status': 'failed', 'message': str(e)}, status=400)
+
+
+    return JsonResponse({'status': 'failed', 'message': 'Invalid request'}, status=400)
+
+def update_advanced_game_settings(request, id):
+    if check_if_exist_and_owner(id, request.user) and server_is_online(id):
+        if request.method == 'POST':
+            api_data = SatisfactoryApi.objects.get(id=id)
+            api = SatisfactoryAPI(api_data.host, api_data.port)
+            login_api(api, api_data.password_hash)
+
+            try:
+                advanced_game_settings = AdvancedGameSettings(
+                    NoPower=request.POST.get('FG.GameRules.NoPower'),
+                    DisableArachnidCreatures=request.POST.get('FG.GameRules.DisableArachnidCreatures'),
+                    NoUnlockCost=request.POST.get('FG.GameRules.NoUnlockCost'),
+                    SetGamePhase=int(request.POST.get('FG.GameRules.SetGamePhase')),
+                    GiveAllTiers=request.POST.get('FG.GameRules.GiveAllTiers'),
+                    UnlockAllResearchSchematics=request.POST.get('FG.GameRules.UnlockAllResearchSchematics'),
+                    UnlockInstantAltRecipes=request.POST.get('FG.GameRules.UnlockInstantAltRecipes'),
+                    UnlockAllResourceSinkSchematics=request.POST.get('FG.GameRules.UnlockAllResourceSinkSchematics'),
+                    GiveItems=request.POST.get('FG.GameRules.GiveItems'),
+                    NoBuildCost=request.POST.get('FG.PlayerRules.NoBuildCost'),
+                    GodMode=request.POST.get('FG.PlayerRules.GodMode'),
+                    FlightMode=request.POST.get('FG.PlayerRules.FlightMode')
+                )
+
+                data = api.apply_advanced_game_settings(advanced_game_settings)
+
+                if not data.success:
+                    return JsonResponse({'status': 'failed', 'message': 'Failed to update advanced game settings'}, status=400)
+
+                return JsonResponse({'status': 'success', 'message': 'Advanced game settings updated'}, status=200)
+            except APIError as e:
+                return JsonResponse({'status': 'failed', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'failed', 'message': 'Invalid request'}, status=400)
+
+def shutdown_server(request, id):
+    if check_if_exist_and_owner(id, request.user) and server_is_online(id):
+        if request.method == 'POST':
+            api_data = SatisfactoryApi.objects.get(id=id)
+            api = SatisfactoryAPI(api_data.host, api_data.port)
+            login_api(api, api_data.password_hash)
+
+            try:
+                data = api.shutdown()
+                if not data.success:
+                    return JsonResponse({'status': 'failed', 'message': 'Failed to shutdown server'}, status=400)
+
+                return JsonResponse({'status': 'success', 'message': 'Server is shutting down'}, status=200)
+            except APIError as e:
+                return JsonResponse({'status': 'failed', 'message': str(e)}, status=400)
+
+    return JsonResponse({'status': 'failed', 'message': 'Invalid request'}, status=400)
+
+
+def get_server_info(request, id):
+    if check_if_exist_and_owner(id, request.user):
+        if not server_is_online(id):
+            return JsonResponse({
+                'online': False,
+                'server_data': {
+                "activeSessionName": "No active session",
+                "numConnectedPlayers": 0,
+                "playerLimit": 4,
+                "techTier": "Unknown",
+                "gamePhase": "Unknown",
+                "isGameRunning": False,
+                "IsGamePaused": True,
+                "totalGameDuration": "Unknown",
+                "averageTickRate": "Unknown"
+            },
+                'serverOptions': None,
+                'advancedGameSettings': None,
+                'saveGames': None
+            })
+
+        api_data = SatisfactoryApi.objects.get(id=id)
+        api = SatisfactoryAPI(api_data.host, api_data.port)
+        login_api(api, api_data.password_hash)
 
         health = api.health_check()
         server_data = api.query_server_state().data['serverGameState']
@@ -99,51 +260,12 @@ def satisfactory_api_details(request, id):
             round(server_data['totalGameDuration'] % 3600 / 60)) + ' minutes'
         server_data['averageTickRate'] = str(round(server_data['averageTickRate']))
 
-        downloadable_game_saves = get_downloadable_game_saves(api)
-        return render(request, 'playable_games/satisfactory_api/dashboard.html', {
-            'page_title': 'Satisfactory API Dashboard',
+        return JsonResponse({
             'online': health.data.get('health', False),
             'server_data': server_data,
-            'saveGames': downloadable_game_saves,
-            'id': id
+            'serverOptions': reformat_server_options(api.get_server_options().data),
+            'advancedGameSettings': reformat_advanced_game_settings(api.get_advanced_game_settings().data),
+            'saveGames': get_downloadable_game_saves(api)
         })
 
-    return redirect('playable_games:satisfactory_api')
-
-def download_satisfactory_api(request, id, save_name):
-    # check if send by ajax
-    if not request.method == 'GET':
-        return JsonResponse({'error': 'Not allowed'}, status=400)
-
-    if check_if_exist_and_owner(id, request.user):
-        api_data = SatisfactoryApi.objects.get(id=id)
-        api = SatisfactoryAPI(api_data.host, api_data.port)
-        login_api(api, api_data.password_hash)
-
-        saveGame = api.download_save_game(save_name)
-
-        if saveGame:
-            return FileResponse(io.BytesIO(saveGame.data), as_attachment=True, filename=save_name + '.sav')
-        else:
-            return JsonResponse({'error': 'Save game not found'}, status=400)
-
-    return JsonResponse({'error': 'Not allowed'}, status=400)
-
-def get_downloadable_game_saves(api):
-    saveGames = []
-    sessions = api.enumerate_sessions().data
-
-    for session in sessions.get('sessions', []):
-        count = 0
-        for saveGame in session['saveHeaders']:
-            saveGames.append({
-                'sessionName': session['sessionName'],
-                'saveName': saveGame['saveName'],
-            })
-            # stop after 3 save games
-            if count == 2:
-                break
-
-            count += 1
-
-    return saveGames
+    return JsonResponse({'status': 'failed', 'message': 'Invalid request'}, status=400)

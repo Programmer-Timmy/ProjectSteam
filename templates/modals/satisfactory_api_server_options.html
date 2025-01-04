@@ -1,0 +1,137 @@
+<div class="modal fade" id="serverOptionsModal" tabindex="-1" aria-labelledby="serverOptionsModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="serverOptionsModalLabel">Edit Server Options</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% for value in serverOptions %}
+                        {% if value.input_type == 'checkbox' %}
+                            <div class="mb-1">
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="{{ value.key }}"
+                                           name="{{ value.key }}"
+                                           {% if value.value == 'True' %}checked{% endif %}>
+                                    <label class="form-check-label" for="{{ value.key }}">{{ value.name }}</label>
+                                </div>
+                                <div id="{{ value.key }}HelpBlock" class="form-text m-0">
+                                    {{ value.description }}
+                                </div>
+                            </div>
+
+                        {% elif value.input_type == 'time' %}
+                            <div class="mb-3">
+                                <label for="{{ value.key }}" class="form-label">{{ value.name }}</label>
+                                <input type="time" class="form-control" id="{{ value.key }}" name="{{ value.key }}"
+                                       value="{{ value.value|default:'00:00' }}">
+                                <div id="{{ value.key }}HelpBlock" class="form-text">
+                                    {{ value.description }}
+                                </div>
+                            </div>
+
+                        {% elif value.input_type == 'range' %}
+                            <div class="mb-3">
+                                <label for="{{ value.key }}" class="form-label">{{ value.name }}</label>
+                                <input type="range" class="form-range" id="{{ value.key }}" name="{{ value.key }}"
+                                       value="{{ value.value }}" min="{{ value.min }}" max="{{ value.max }}"
+                                       step="{{ value.step }}">
+                                <div id="{{ value.key }}HelpBlock" class="form-text m-0">
+                                    {{ value.description }}
+                                </div>
+
+                            </div>
+                        {% else %}
+                            <div class="mb-3">
+                                <label for="{{ value.key }}" class="form-label">{{ value.name }}</label>
+                                <input type="number" class="form-control" id="{{ value.key }}" name="{{ value.key }}"
+                                       value="{{ value.value }}" min="{{ value.min }}" max="{{ value.max }}"
+                                       step="{{ value.step }}">
+                                <div id="{{ value.key }}HelpBlock" class="form-text">
+                                    {{ value.description }}
+                                </div>
+
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span id="button-text">Save</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const button = $('#serverOptionsModal button[type="submit"]');
+        const buttonText = button.find('#button-text');
+        const spinner = button.find('.spinner-border');
+
+        $('#serverOptionsModal form').submit(function (e) {
+            e.preventDefault();
+
+            buttonText.text('Saving...');
+            button.attr('disabled', true);
+            spinner.removeClass('d-none');
+
+            const form = $(this);
+            const url = '{% url 'playable_games:satisfactory_api:update_satisfactory_api' id %}';
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: form.serialize(),
+                success: function (data) {
+                    if (data.status === 'success') {
+                        buttonText.text('Save');
+                        spinner.addClass('d-none');
+                        button.attr('disabled', false);
+                        $('#serverOptionsModal').modal('hide');
+
+                        showMessageModal('success', 'Success', 'Server options have been updated.');
+                        
+                    } else {
+                        buttonText.text('Save');
+                        spinner.addClass('d-none');
+                        button.attr('disabled', false);
+                        $('#serverOptionsModal').modal('hide');
+
+                        updateMessageModal('error', 'Error', 'An error occurred. Please try again.');
+                    }
+                },
+                error: function () {
+                    buttonText.text('Save');
+                    spinner.addClass('d-none');
+                    button.attr('disabled', false);
+                    $('#serverOptionsModal').modal('hide');
+
+                    showMessageModal('error', 'Error', 'An error occurred. Please try again.');
+                }
+            });
+        });
+    });
+    
+    function updateServerOptions(serverOptions) {
+        for (const option of serverOptions) {
+            const element = $(`#${option.key}`);
+            if (element.length === 0) {
+                continue;
+            }
+
+            if (option.input_type === 'checkbox') {
+                element.prop('checked', option.value === 'True');
+            } else {
+                element.val(option.value);
+            }
+        }
+    }
+</script>

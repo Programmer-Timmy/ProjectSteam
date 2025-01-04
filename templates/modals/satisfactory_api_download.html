@@ -61,20 +61,31 @@
 
                 // Close the modal
                 $('#downloadModal').modal('hide');
+                showMessageModal('success', 'Success', 'Save game has been downloaded.');
 
             } else {
                 // Handle errors
-                alert('Error: ' + data.message);
+                showMessageModal('error', 'Error', 'An error occurred while downloading the save game.');
             }
 
             downloadButton.html('Download');
             downloadButton.prop('disabled', false);
             downloadButton.find('.spinner-border').addClass('d-none');
         }).fail(function () {
-            alert('An error occurred while downloading the save game.');
             downloadButton.html('Download');
             downloadButton.prop('disabled', false);
             downloadButton.find('.spinner-border').addClass('d-none');
+            showMessageModal('error', 'Error', 'An error occurred while downloading the save game.');
         });
     });
+    
+    function updateSaveGames(saveGames) {
+        const gameSessionSelect = $('#game_session');
+        gameSessionSelect.empty();
+        gameSessionSelect.append('<option value="" disabled selected>Select a Game Save</option>');
+
+        for (const gameSession of saveGames) {
+            gameSessionSelect.append(`<option value="${gameSession.saveName}">${gameSession.saveName}</option>`);
+        }
+    }
 </script>

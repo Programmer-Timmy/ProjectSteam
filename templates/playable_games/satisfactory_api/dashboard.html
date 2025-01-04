@@ -21,36 +21,37 @@
             <!-- Server Status -->
             <div class="col-md-3">
                 <div class="card shadow-sm bg-dark border-dark shadow-sm">
-                    <div class="card-body text-center d-flex align-items-center">
-                        {% if online %}
+                    <div class="card-body text-center">
+                        <div id="online" class="d-flex align-items-center {% if not online %}d-none{% endif %}">
                             <div class="online rounded-circle bg-success text-white d-flex justify-content-center align-items-center outside-blink"
                                  style="width: 60px; height: 60px;">
                             </div>
                             <h5 class="card-title text-success ms-3 mb-0">Online</h5>
-                        {% else %}
+                        </div>
+                        <div id="offline" class="d-flex align-items-center {% if online %}d-none{% endif %}">
                             <div class="offline rounded-circle bg-danger text-white d-flex justify-content-center align-items-center outside-blink"
                                  style="width: 60px; height: 60px;">
                             </div>
                             <h5 class="card-title text-danger ms-3 mb-0">Offline</h5>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
                 <div class="card shadow-sm bg-dark border-dark shadow-sm mt-4">
-                    <div class="card-body">
+                    <div class="card-body" id="server_buttons">
                         <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
-                                data-bs-target="#downloadModal">
+                                data-bs-target="#downloadModal" {% if not online %}disabled{% endif %}>
                             Download Save Game
                         </button>
                         <button type="button" class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
-                                data-bs-target="#advancedSettingsModal">
+                                data-bs-target="#advancedGameSettingsModal" {% if not online %}disabled{% endif %}>
                             Advanced Game Settings
                         </button>
                         <button type="button" class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
-                                data-bs-target="#settingsModal">
+                                data-bs-target="#serverOptionsModal" {% if not online %}disabled{% endif %}>
                             Change Settings
                         </button>
                         <button type="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal"
-                                data-bs-target="#shutdownModal">
+                                data-bs-target="#shutdownModal" {% if not online %}disabled{% endif %}>
                             Shutdown Server
                         </button>
 
@@ -98,6 +99,10 @@
             </div>
         </div>
     </div>
+    {% include 'modals/message_modal.html' %}
+    {% include 'modals/satisfactory_api_shutdown.html' %}
+    {% include 'modals/satisfactory_api_advanced_game_settings.html' %}
+    {% include 'modals/satisfactory_api_server_options.html' %}
     {% include 'modals/satisfactory_api_download.html' %}
     <style>
         .outside-blink {
@@ -164,4 +169,69 @@
             }
         }
     </style>
+
+    <script>
+        {#    evrey 1 minuit get new data#}
+
+        function updateServerData() {
+            $.get('{% url 'playable_games:satisfactory_api:get_server_info' id %}', function (data) {
+                const serverData = data.server_data;
+                const serverOptions = data.serverOptions;
+                const advancedGameSettings = data.advancedGameSettings;
+                const saveGames = data.saveGames;
+
+                const online = data.online;
+                const onlineElement = $('#online');
+                const offlineElement = $('#offline');
+                const serverButtons = $('#server_buttons button');
+
+                if (online) {
+                    onlineElement.removeClass('d-none');
+                    offlineElement.addClass('d-none');
+                    serverButtons.attr('disabled', false);
+                } else {
+                    onlineElement.addClass('d-none');
+                    offlineElement.removeClass('d-none');
+                    serverButtons.attr('disabled', true);
+                }
+
+                if (serverData === null) {
+                    return;
+                }
+                $('#server_data').html(`
+                    <dt class="col-sm-4">Active Save Game:</dt>
+                    <dd class="col-sm-8">${serverData.activeSessionName}</dd>
+
+                    <dt class="col-sm-4">Player Count:</dt>
+                    <dd class="col-sm-8">${serverData.numConnectedPlayers} / ${serverData.playerLimit}</dd>
+
+                    <dt class="col-sm-4">Tier:</dt>
+                    <dd class="col-sm-8">${serverData.techTier}</dd>
+
+                    <dt class="col-sm-4">Game Phase:</dt>
+                    <dd class="col-sm-8">${serverData.gamePhase}</dd>
+
+                    <dt class="col-sm-4">Is Game Running:</dt>
+                    <dd class="col-sm-8">
+                        ${serverData.isGamePaused ? '<span class="text-danger">No</span>' : '<span class="text-success">Yes</span>'}
+                    </dd>
+
+                    <dt class="col-sm-4">Total Duration:</dt>
+                    <dd class="col-sm-8">${serverData.totalGameDuration}</dd>
+
+                    <dt class="col-sm-4">Tick Rate:</dt>
+                    <dd class="col-sm-8">${serverData.averageTickRate} ticks/s</dd>
+                `);
+
+                updateSaveGames(saveGames);
+                updateServerOptions(serverOptions);
+                updateAdvancedGameSettings(advancedGameSettings);
+            });
+        }
+
+        $(document).ready(function () {
+            setInterval(updateServerData, 60000);
+        });
+
+    </script>
 {% endblock %}

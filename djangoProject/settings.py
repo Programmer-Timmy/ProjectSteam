@@ -142,3 +142,4 @@ SOCIAL_ACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True  # Ensures email verification
     }
 }
+

@@ -1,8 +1,9 @@
-import importlib
 import os
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from dotenv import load_dotenv
+
+from games.playable_games.utils import get_playable_games
 
 load_dotenv()
 hash_key = os.getenv('HASH_KEY')
@@ -18,32 +19,7 @@ def index(request):
     Returns:
         HttpResponse: The rendered 'games/playable_games.html' template with free-to-play games.
     """
-    IMAGES = {
-        'satisfactory_api': 'https://portfolio.timmygamer.nl/img/66fe973b40b0f7.53385927.jpg',
-    }
-
-    DESCRIPTIONS = {
-        'satisfactory_api': 'YES',
-    }
-
-    module = importlib.import_module('games.playable_games.urls')
-    urlpatterns = getattr(module, 'urlpatterns').copy()
-
-    urlpatterns.pop(0)  # Remove the index path
-    games = []
-
-    for url in urlpatterns:
-        link = url.pattern._route.replace('/\Z', '').replace('^', '').replace('/', '')
-        name = link.replace('_', ' ').title()
-        games.append({
-            'name': name,
-            'url': "playable_games:" + link + ":index",
-            'image_url': IMAGES.get(link, ''),
-            'description': DESCRIPTIONS.get(link, ''),
-        })
-
-
     return render(request, 'playable_games/playable_games.html', {
         'page_title': 'Playable Games',
-        'games': games
+        'games': get_playable_games()
     })

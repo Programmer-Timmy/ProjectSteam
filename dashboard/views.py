@@ -6,6 +6,7 @@ from django.db.models import F, Sum, Count, Prefetch
 from account.models import Friend
 from dashboard.models import GameSessions
 from games.models import Games, GameCategoriesLink
+from games.playable_games.utils import get_playable_games
 from games.utils import get_available_years
 from .utils import get_total_played_data, get_weekly_played_data, format_time
 
@@ -46,6 +47,7 @@ def index(request):
     average_playtime = format_time(average_playtime)
 
     friends = Friend.objects.filter(user=request.user, friend__opt_out=False)
+    print(get_playable_games())
     return render(request, 'dashboard/index.html', {
         'page_title': 'Dashboard',
         'top_10_games': top_10_games,
@@ -54,6 +56,7 @@ def index(request):
         'total_playtime': total_playtime,
         'average_playtime': average_playtime,
         'friends': friends,
+        'playable_games': get_playable_games()
     })
 
 
