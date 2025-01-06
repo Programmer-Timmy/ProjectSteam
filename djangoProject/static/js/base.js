@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const toastTemplate = getToCloseToast(message, isToClose);
         $('#toast-container').append(toastTemplate);
         const toCloseToast = $('#ToCloseToast');
-        console.log(toCloseToast)
 
         toCloseToast.toast('show');
 

@@ -25,16 +25,13 @@ def communicate_with_pico():
                 try:
                     data = pico_uart.read_until()
                     data = data.decode('utf-8').strip() == 'True'
-                    print(data)
                     # distance = float(decoded_data)
                     if data and not last_update:
                         update_user_is_to_close(True)
                         last_update = True
-                        print("Updated status to: True")
                     if not data and last_update:
                         update_user_is_to_close(False)
                         last_update = False
-                        print("Updated status to: False")
 
 
 
