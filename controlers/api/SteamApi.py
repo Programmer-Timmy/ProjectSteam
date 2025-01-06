@@ -51,5 +51,27 @@ class SteamApi:
 
         return None
 
+    def fetch_steam_user_data(self, steam_id):
+        """
+        Fetch user data from Steam API based on the user's steamid.
 
+        Args:
+            steam_id (int): The steamid of the user to fetch data for.
+
+        Returns:
+            dict or None: User data from Steam, or None if the request fails or data is unavailable.
+        """
+        url = f'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={self.STEAM_API_KEY}&steamids={steam_id}'
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            return
+
+        if not data:
+            return
+
+        return data
 

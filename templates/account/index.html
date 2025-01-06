@@ -29,7 +29,7 @@
                     <div class="col-auto text-end">
                         {% if not user.steam_opt_out and user.steam_id %}
                             <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}"
-                               class="p-2">
+                               class="p-2" target="_blank">
                                 <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30" width="30">
                             </a>
                         {% endif %}
@@ -119,7 +119,7 @@
                                                  alt="{{ game.user_game.app.name }}">
                                             <div class="card-body">
                                                 <h5 class="card-title">{{ game.user_game.app.name }}</h5>
-                                                <p class="card-text">Played {{ game.user_game.last_played|date:"F j, Y" }}</p>
+                                                <p class="card-text">Played {{ game.start_timestamp|date:"F j, Y" }}</p>
                                                 <p class="card-text">Playtime: {{ game.total_time }} hours</p>
                                             </div>
                                         </div>

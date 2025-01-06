@@ -27,6 +27,7 @@ def index(request):
         HttpResponse: Rendered profile page.
     """
     last_played_games = GameSessions.objects.filter(user_game__user=request.user).order_by('-start_timestamp')[:3]
+    print(last_played_games)
     friends = Friend.objects.filter(user=request.user, friend__public_profile=True)
 
     img_exists = False

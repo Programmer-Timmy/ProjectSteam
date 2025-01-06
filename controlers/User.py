@@ -32,6 +32,7 @@ class UserManager:
             The user object whose Steam games need to be updated.
         -------
         """
+        print("Fetching data from Steam API...")
         last_played_games_in_db = self._get_last_played_games(user)
         recently_played_games = SteamApi().fetch_steam_recently_played_games(user.steam_id)
 
@@ -177,3 +178,38 @@ class UserManager:
                 total_time=hours_played,
                 ongoing=False
             )
+
+    def _update_user_data(self, user, user_data):
+        """
+        Updates the user data in the database.
+
+        Parameters
+        -------
+        user : User
+            The user object.
+        user_data : dict
+            User data retrieved from the Steam API.
+        -------
+        """
+        user.avatar_url = user_data['response']['players'][0]['avatarfull']
+        user.steam_username = user_data['response']['players'][0]['personaname']
+        user.save()
+
+
+    def update_steam_user_data(self, user):
+        """
+        Updates the Steam user data for a given user.
+
+        Parameters
+        -------
+        user : User
+            The user object whose Steam user data needs to be updated.
+        -------
+        """
+        user_data = SteamApi().fetch_steam_user_data(user.steam_id)
+
+        if not user_data:
+            self._handle_api_error(user)
+            return
+
+        self._update_user_data(user, user_data)

@@ -30,5 +30,6 @@ class Command(BaseCommand):
         for user in users:
             # getting last palayed games in the last 2 weeks form the databavse
             UserManager(self.stdout, self.style).update_steam_games(user)
+            UserManager(self.stdout, self.style).update_steam_user_data(user)
 
         self.stdout.write(self.style.SUCCESS(f"Processed {users.count()} users successfully."))

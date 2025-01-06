@@ -10,8 +10,8 @@
                     <!-- Profile Picture -->
                     <div class="col-auto">
                         <img src="
-                        {% if user_profile.use_steam_profile %}
-                            {{ account_user.avatar_url }}
+                        {% if user.use_steam_profile and user_profile.use_steam_profile %}
+                            {{ user_profile.avatar_url }}
                         {% elif user_profile.profile_picture and user_profile.profile_picture.url %}
                             {{ user_profile.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                         {% else %}
@@ -30,8 +30,8 @@
 
                     <div class="col-auto text-end">
                         {% if not user_profile.steam_opt_out and user_profile.steam_id %}
-                            <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}"
-                               class="p-2">
+                            <a href="https://steamcommunity.com/profiles/{{ user_profile.steam_id }}"
+                               class="p-2" target="_blank">
                                 <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30" width="30">
                             </a>
                         {% endif %}
@@ -66,7 +66,7 @@
                                         <div class="card-body">
                                             <h5 class="card-title">{{ game.user_game.app.name }}</h5>
                                             <p class="card-text">
-                                                Played {{ game.user_game.last_played|date:"F j, Y" }}</p>
+                                                Played {{ game.start_timestamp|date:"F j, Y" }}</p>
                                             <p class="card-text">Playtime: {{ game.total_time }} hours</p>
                                         </div>
                                     </div>
