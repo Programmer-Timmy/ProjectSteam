@@ -5,12 +5,13 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import get_authorization_header
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, api_view
 from rest_framework.permissions import IsAuthenticated
 
 from AuthManager.models import CustomUser
 from django.contrib import messages
 
+from TI.pc.pcmain import api_key
 
 
 # def get_online_status_from_User(request, user_id):
@@ -52,6 +53,16 @@ def set_is_to_close_status(request):
         user.save()
         return JsonResponse({'success': True})
     return JsonResponse({'error': 'Invalid method'}, status=400)
+
+@csrf_exempt
+def set_distance(request):
+    if request.method == "POST":
+        api_key = request.POST.get('api_key')
+        distance = request.POST.get('distance')
+        user = get_object_or_404(CustomUser, api_key=api_key)
+        user.distance = distance
+        user.save()
+        return JsonResponse({'success': True})
 @login_required()
 def get_online_status_from_user(request):
     user = request.user

@@ -1,4 +1,9 @@
+import {getToCloseToast} from "./toast-template.js";
+
 document.addEventListener("DOMContentLoaded", () => {
+    // if (hasRaspberry){
+
+
     // Define the API endpoints
     const getOnlineStatusAPI = `/raspberry/get_status/`;
     const getIsToCloseAPI = `/raspberry/get_is_to_close/`;
@@ -6,56 +11,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let lastOnlineStatus = null;
     let lastToCloseStatus = null;
 
-    const createToastContainer = () => {
-        let toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.id = 'toast-container';
-            toastContainer.style.position = 'fixed';
-            toastContainer.style.top = '20px';
-            toastContainer.style.right = '20px';
-            toastContainer.style.zIndex = '1050';
-            document.body.appendChild(toastContainer);
-        }
-        return toastContainer;
-    };
-
     const showToast = (message, isOnline, isToClose) => {
-        const toastContainer = createToastContainer();
-
-        const toastElement = document.createElement('div');
-        toastElement.className = 'toast';
-        toastElement.setAttribute('role', 'alert');
-        toastElement.setAttribute('aria-live', 'assertive');
-        toastElement.setAttribute('aria-atomic', 'true');
-
-        // Determine the toast color based on the status
-        if (isToClose) {
-            toastElement.style.backgroundColor = 'red';
-        } else if (isOnline) {
-            toastElement.style.backgroundColor = 'green';
-        } else {
-            toastElement.style.backgroundColor = 'grey';
+        const existingToast = $('#ToCloseToast');
+        if (existingToast.length) {
+            existingToast.toast('hide');
+            existingToast.remove();
         }
 
-        toastElement.innerHTML = `
-            <div class="toast-header ${isToClose ? 'bg-danger text-white' : (isOnline ? 'bg-success text-white' : 'bg-success text-black')}">
-                <strong class="me-auto">Status Update</strong>
-                <small>just now</small>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body text-black">
-                ${message}
-            </div>
-        `;
+        const toastTemplate = getToCloseToast(message, isToClose);
+        $('#toast-container').append(toastTemplate);
+        const toCloseToast = $('#ToCloseToast');
 
-        toastContainer.appendChild(toastElement);
+        toCloseToast.toast('show');
 
-        const bootstrapToast = new bootstrap.Toast(toastElement);
-        bootstrapToast.show();
-
-        toastElement.addEventListener('hidden.bs.toast', () => {
-            toastElement.remove();
+        toCloseToast.on('hidden.bs.toast', function () {
+            toCloseToast.remove();
         });
     };
 
@@ -91,18 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const is_online = onlineData.is_online;
                 const is_to_close = isToCloseData.is_to_close;
 
-                // Update DOM for user status
-                const userInfoDiv = document.getElementById("user-info");
-                if (userInfoDiv) {
-                    userInfoDiv.innerHTML = `
-                        <h1>User Status</h1>
-                        <p>User: ${onlineData.user_id}</p>
-                        <p>Status: 
-                            <span style="color: ${is_online ? 'green' : 'red'};">${is_online ? 'Online' : 'Offline'}</span>
-                        </p>
-                    `;
-                }
-
                 // Show toast if online status changes
                 if (lastOnlineStatus !== null && lastOnlineStatus !== is_online) {
                     const message = is_online ? "The user is now online." : "The user is now offline.";
@@ -126,5 +84,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Call fetchStatuses at regular intervals (e.g., every 5 seconds)
     setInterval(fetchStatuses, refreshTime);
-
+        // }
 });
