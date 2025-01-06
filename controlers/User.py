@@ -1,6 +1,10 @@
 from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
+from steam_web_api import Steam
+
+from AuthManager.models import CustomUser
+from account.models import Friend
 from controlers.api.SteamApi import SteamApi
 from dashboard.models import GameSessions
 from games.models import Games
@@ -33,14 +37,25 @@ class UserManager:
         -------
         """
         print("Fetching data from Steam API...")
+        user_games = SteamApi().fetch_steam_user_games(user.steam_id)
+        user_friends = SteamApi().fetch_steam_user_friends(user.steam_id)
         last_played_games_in_db = self._get_last_played_games(user)
         recently_played_games = SteamApi().fetch_steam_recently_played_games(user.steam_id)
 
-        if not recently_played_games:
+        if recently_played_games:
+            self._process_recent_games(recently_played_games['response']['games'], user, last_played_games_in_db)
+        else:
             self._handle_api_error(user)
-            return
 
-        self._process_recent_games(recently_played_games['response']['games'], user, last_played_games_in_db)
+        if user_games:
+            self._update_user_games(user, user_games)
+        else:
+            self._handle_api_error(user)
+
+        if user_friends:
+            self._update_user_friends(user, user_friends)
+        else:
+            self._handle_api_error(user)
 
     def _get_last_played_games(self, user):
         """
@@ -112,13 +127,21 @@ class UserManager:
         -------
         """
         if not Games.objects.filter(appid=game['appid']).exists():
+            if not game.get('name'):
+                game_data = SteamApi().fetch_steam_game_data(game['appid'])
+                if not game_data:
+                    return
+                game['name'] = game_data['name']
+
             if self.stdout:
                 self.stdout.write(f"Game: {game['name']} not found in the database. Adding it now.")
-            Games.objects.create(
+            return Games.objects.create(
                 appid=game['appid'],
                 name=game['name'],
                 steam_image=f"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{game['appid']}/header.jpg"
             )
+
+        return Games.objects.get(appid=game['appid'])
 
     def _add_game_to_user_if_missing(self, game, user):
         """
@@ -213,3 +236,76 @@ class UserManager:
             return
 
         self._update_user_data(user, user_data)
+
+    def _update_user_games(self, user, user_games):
+        """
+        Updates the user's games in the database.
+
+        Parameters
+        -------
+        user : User
+            The user object.
+        user_games : list
+            List of games played by the user.
+        -------
+        """
+        for game in user_games['response']['games']:
+            existing_game = self._add_game_to_db_if_missing(game)
+            if not existing_game:
+                continue
+
+            game['name'] = existing_game.name
+            self._add_game_to_user_if_missing(game, user)
+
+        return
+
+    def _update_user_friends(self, user, user_friends):
+        """
+        Updates the user's friends in the database.
+
+        Parameters
+        -------
+        user : User
+            The user object.
+        user_friends : list
+            List of friends of the user.
+        -------
+        """
+        for friend in user_friends['friendslist']['friends']:
+            existing_user = CustomUser.objects.filter(steam_id=friend['steamid']).first()
+            if existing_user:
+                existing_friend_row = Friend.objects.filter(user=user, friend=existing_user).first()
+                if not existing_friend_row:
+                    Friend.objects.create(user=user, friend=existing_user)
+                    Friend.objects.create(user=existing_user, friend=user)
+                existing_steam_id_row = user.friend.filter(steam_id=friend['steamid']).first()
+                if existing_steam_id_row:
+                    existing_friend_row.delete()
+
+            else:
+                if friend['steamid'] == user.steam_id:
+                    continue
+
+                existing_friend_row = Friend.objects.filter(user=user, steam_id=friend['steamid']).first()
+                if existing_friend_row:
+                    if not existing_friend_row.friend_name and not existing_friend_row.avatar_url:
+                        user_data = SteamApi().fetch_steam_user_data(friend['steamid'])
+                        if user_data:
+                            existing_friend_row.friend_name = user_data['response']['players'][0]['personaname']
+                            existing_friend_row.avatar_url = user_data['response']['players'][0]['avatarfull']
+                            existing_friend_row.save()
+                    continue
+
+                print(f"Adding friend: {friend['steamid']} to the database.")
+                user_data = SteamApi().fetch_steam_user_data(friend['steamid'])
+                if user_data:
+                    Friend.objects.create(
+                        user=user,
+                        steam_id=friend['steamid'],
+                        friend_name=user_data['response']['players'][0]['personaname'],
+                        avatar_url=user_data['response']['players'][0]['avatarfull']
+                    )
+                else:
+                    Friend.objects.create(user=user, steam_id=friend['steamid'])
+
+        return

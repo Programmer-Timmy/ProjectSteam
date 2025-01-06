@@ -3,7 +3,6 @@ import os
 import requests
 from dotenv import load_dotenv
 
-
 class SteamApi:
 
     def __init__(self):
@@ -62,6 +61,54 @@ class SteamApi:
             dict or None: User data from Steam, or None if the request fails or data is unavailable.
         """
         url = f'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key={self.STEAM_API_KEY}&steamids={steam_id}'
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            return
+
+        if not data:
+            return
+
+        return data
+
+    def fetch_steam_user_games(self, steam_id):
+        """
+        Fetch user games from Steam API based on the user's steamid.
+
+        Args:
+            steam_id (int): The steamid of the user to fetch games for.
+
+        Returns:
+            dict or None: User games from Steam, or None if the request fails or data is unavailable.
+        """
+        url = f'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key={self.STEAM_API_KEY}&steamid={steam_id}'
+
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            data = response.json()
+        except requests.exceptions.RequestException as e:
+            return
+
+        if not data:
+            return
+
+        return data
+
+    def fetch_steam_user_friends(self, steam_id):
+        """
+        Fetch user friends from Steam API based on the user's steamid.
+
+        Args:
+            steam_id (int): The steamid of the user to fetch friends for.
+
+        Returns:
+            dict or None: User friends from Steam, or None if the request fails or data is unavailable.
+        """
+        url = f'https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key={self.STEAM_API_KEY}&steamid={steam_id}'
 
         try:
             response = requests.get(url)

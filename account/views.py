@@ -27,8 +27,9 @@ def index(request):
         HttpResponse: Rendered profile page.
     """
     last_played_games = GameSessions.objects.filter(user_game__user=request.user).order_by('-start_timestamp')[:3]
-    print(last_played_games)
     friends = Friend.objects.filter(user=request.user, friend__public_profile=True)
+    steam_friends = Friend.objects.filter(user=request.user, steam_id__isnull=False)
+    print(steam_friends)
 
     img_exists = False
     image_path = os.path.join('media', 'profile_images', f'{request.user.id}.jpg')
@@ -41,6 +42,7 @@ def index(request):
         'last_played_games': last_played_games,
         'friends': friends,
         'img_exists': img_exists,
+        'steam_friends': steam_friends,
     })
 
 
@@ -74,6 +76,7 @@ def profile(request, user_id):
         })
 
     friends = Friend.objects.filter(user=user, friend__public_profile=True, friend__opt_out=False)
+    steam_friends = Friend.objects.filter(user=user, steam_id__isnull=False)
     last_played_games = GameSessions.objects.filter(user_game__user=user).order_by('-start_timestamp')[:3]
 
     return render(request, 'account/profile.html', {
@@ -81,6 +84,7 @@ def profile(request, user_id):
         'last_played_games': last_played_games,
         'friends': friends,
         'user_profile': user,
+        'steam_friends': steam_friends
     })
 
 
