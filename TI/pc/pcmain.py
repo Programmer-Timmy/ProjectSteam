@@ -1,3 +1,5 @@
+from copyreg import dispatch_table
+
 import serial
 import time
 import requests
@@ -17,32 +19,32 @@ def communicate_with_pico():
 
     try:
         time.sleep(1)
+
         while True:
             if pico_uart.in_waiting > 0:
                 try:
                     data = pico_uart.read_until()
-                    decoded_data = data.decode('utf-8').strip()  # Remove trailing spaces/newlines
-                    #Checks if the data send by the Pico is True and check if the last update wasnt also true. this prevents redundant updates
-                    if decoded_data.lower() == 'true' and last_update is not True:
+                    data = data.decode('utf-8').strip() == 'True'
+                    print(data)
+                    # distance = float(decoded_data)
+                    if data and not last_update:
                         update_user_is_to_close(True)
                         last_update = True
                         print("Updated status to: True")
-                    # Checks if the data send by the Pico is False and check if the last update wasnt also true. this prevents redundant updates
-                    elif decoded_data.lower() == 'false' and last_update is not False:
+                    if not data and last_update:
                         update_user_is_to_close(False)
                         last_update = False
                         print("Updated status to: False")
 
-                    else:
-                        print("No status change.")
+
 
                 except UnicodeDecodeError:
-                    print("Failed to decode data from Pico. Received:", data)
+                    print("Failed to decode data from Pico. Received:")
 
             else:
                 print("No data received yet.")
 
-            time.sleep(1)
+            time.sleep(0.5)
 
     except Exception as e:
         print(f"Unexpected error: {e}")
