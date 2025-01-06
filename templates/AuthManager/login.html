@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,6 +48,10 @@
         </form>
         <div class="text-center mt-3">
             <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+        </div>
+        <div class="text-center">
+            <p>Or login with</p>
+            <a href="{% url 'social:begin' 'steam' %}"><img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30" width="30"></a>
         </div>
     </div>
 </div>

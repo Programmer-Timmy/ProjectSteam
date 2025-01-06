@@ -1,82 +1,77 @@
-import json
-
-import requests
 from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
 
-from dashboard.models import Games
+from controlers.api.SteamApi import SteamApi
+from controlers.api.SteamSpyApi import SteamSpyApi
+from games.models import Games
+from games.utils import update_game_with_steam_data, \
+    get_sorted_unique_game_categories, get_sorted_unique_game_genres, get_sorted_unique_game_platforms, \
+    get_sorted_unique_game_tags
 
 
-# Create your views here.
 def index(request):
-    # get all games from the database
-    games = Games.objects.all().order_by('appid')[0:30]
+    """
+    Renders the homepage displaying games based on the search query and limit.
+
+    Args:
+        request (HttpRequest): The request object containing user inputs (search, limit).
+
+    Returns:
+        HttpResponse: The rendered 'games/index.html' template with game data.
+    """
+    limit = int(request.GET.get('limit', 30))
+    search = request.GET.get('search', '')
+
+    # Fetch games from the database with optional search filter
+    if search:
+        games = Games.objects.filter(name__icontains=search).order_by('appid')[:limit]
+    else:
+        games = Games.objects.all().order_by('appid')[:limit]
 
     return render(request, 'games/index.html', {
         'page_title': 'Games',
-        'games': games
+        'games': games,
+        'search': search,
+        'limit': limit
     })
 
-def fetch_steam_data(appid):
-    """
-    Fetch game data from Steam Store API based on the game's name.
-    """
-
-    try:
-        app_url = f"https://store.steampowered.com/api/appdetails/?appids={appid}"
-        response = requests.get(app_url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-
-        if data:
-            try:
-                return data[str(appid)]['data']
-            except KeyError:
-                return None
-
-        return None
-    except (requests.RequestException, ValueError):
-        return None
 
 def game(request, game_id):
-    # Get the game from the database
+    """
+    Renders the game detail page for a specific game by appid, fetching data if necessary.
+
+    Args:
+        request (HttpRequest): The request object containing user inputs (limit, search).
+        game_id (int): The appid of the game to display.
+
+    Returns:
+        HttpResponse: The rendered 'games/game.html' template with detailed game data.
+    """
+    limit = int(request.GET.get('limit', 30))
+    search = request.GET.get('search', '')
+
     game = get_object_or_404(Games, appid=game_id)
+    game.steam_url = f"https://store.steampowered.com/app/{game.appid}&l=en"
 
-    game.steam_url = f"https://store.steampowered.com/app/{game.appid}"
+    if not all([game.steam_image, game.description, game.short_description, game.price,
+                game.developer, game.publisher, game.release_date, game.positive_ratings,
+                game.negative_ratings, game.owners]):
+        print(f"Fetching data for {game.name}...")
 
-    # cache the game's image, description, and short description because of the API rate limit
-    if not game.steam_image or not game.description or not game.short_description:
-        # Fetch Steam API data using the game's name
-        steam_data = fetch_steam_data(game.appid)
-        if steam_data:
-            game.steam_image = steam_data['header_image']
-            game.description = steam_data.get('detailed_description', '')
-            game.short_description = steam_data.get('short_description', '')
+        steam_data = SteamApi.fetch_steam_game_data(game.appid)
+        steam_spy_data = SteamSpyApi.get_steam_game_data(game.appid)
 
-            # Update the game with the new data
-            game.save()
+        if steam_data and steam_spy_data:
+            game = update_game_with_steam_data(game, steam_data, steam_spy_data)
 
-    # Organize categories
-    game.categories = [link.category.category_name for link in game.game_category_links.all()]
-    game.categories = list(set(game.categories))
-    game.categories.sort()
-
-    # Organize genres
-    game.genres = [link.genre.genre_name for link in game.game_genre_links.all()]
-    game.genres = list(set(game.genres))
-    game.genres.sort()
-
-    # Organize platforms
-    game.platforms = [link.platform.platform_name for link in game.game_platform_links.all()]
-    game.platforms = list(set(game.platforms))
-    game.platforms.sort()
-
-    # Organize tags
-    game.steamspy_tags = [link.tag.tag_name for link in game.game_tag_links.all()]
-    game.steamspy_tags = list(set(game.steamspy_tags))
-    game.steamspy_tags.sort()
+    game.categories = get_sorted_unique_game_categories(game)
+    game.genres = get_sorted_unique_game_genres(game)
+    game.platforms = get_sorted_unique_game_platforms(game)
+    game.steamspy_tags = get_sorted_unique_game_tags(game)
 
     return render(request, 'games/game.html', {
         'page_title': game.name,
-        'game': game
+        'game': game,
+        'search': search,
+        'limit': limit
     })
-# Compare this snippet from games/views.py:

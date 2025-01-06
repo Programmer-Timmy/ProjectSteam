@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container text-center mt-5">
+    <h1 class="display-4 fw-bold">Disconnect Your Steam Account</h1>
+    <p class="lead text-muted mt-3">
+        Are you sure you want to disconnect your Steam account?<br>
+        You won't be able to use all the features of the dashboard.
+    </p>
+    <div class="mt-4">
+{#        go back javascript#}
+        <form method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-lg" value="disconnect" name="disconnect">
+                Disconnect
+            </button>
+        </form>
+        <a href="{% url 'dashboard-index' %}" class="btn btn-secondary btn-lg">
+            Cancel
+        </a>
+    </div>
+    <div class="mt-5">
+        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/753/header.jpg"
+             alt="Steam Banner"
+             class="img-fluid rounded shadow">
+    </div>
+</div>
+
+{% endblock %}

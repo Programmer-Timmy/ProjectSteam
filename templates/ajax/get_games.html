@@ -1,8 +1,9 @@
 {% if games %}
     <div class="row">
-{#    litle allert to tell that not all images are loaded becouse of the api limit#}
+        {#    litle allert to tell that not all images are loaded becouse of the api limit#}
         <div class="alert alert-warning text-center" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> Some images or descriptions may not be available due to API rate limits.
+            <i class="bi bi-exclamation-triangle"></i> Some content, such as images, descriptions, or other data, may be
+            unavailable due to API rate limits or restrictions.
         </div>
         {% for game in games %}
             <div class="col-md-4 col-sm-6 col-12 mb-4">
@@ -28,12 +29,12 @@
                         {% endif %}
                         <div class="mt-auto">
                             <div class="d-flex justify-content-between align-items-center">
-                                <a href="{% url 'game' game.appid %}"
-                                   class="btn btn-sm btn-primary">
+                                <a href="{% url 'game' game.appid %}?search={{ search }}&limit={{ limit }}"
+                                   class="btn btn-sm btn-primary show-loading">
                                     View
                                 </a>
                                 <div class="text-end">
-                                    <small class="d-block text-muted">{{ game.release_date }}</small>
+                                    <small class="d-block text-muted">{{ game.release_date|default:"No release date" }}</small>
                                     <span class="text-success fw-bold">{% if game.price == 0 %}
                                         Free {% else %}{{ game.price }}{% endif %}</span>
                                 </div>

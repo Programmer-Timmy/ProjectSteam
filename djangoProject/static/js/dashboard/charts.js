@@ -22,7 +22,8 @@ function drawCharts(year = false, startWeek = false, endWeek = false, skip = fal
     fetch('/dashboard/data?year=' + year + '&startWeek=' + startWeek + '&endWeek=' + endWeek)
         .then(response => response.json())
         .then(data => {
-            changeYearAndWeek(year, startWeek, endWeek);
+            changeYearAndWeek(data.selectedYear, startWeek, endWeek);
+            updateAnvalibleYears(data.availableYears, data.selectedYear);
             $('.spinner-border.user').parent().addClass('d-none');
             $('.visually-hidden.user').removeClass('visually-hidden');
             if (data.totalPlayed.length === 0) {
@@ -194,3 +195,23 @@ darkModeToggle.addEventListener('change', () => {
     drawCharts(false, false, false, true);
     drawChartsFriends(false, false, false, true);
 });
+
+function updateAnvalibleYears(availableYears, selectedYear) {
+    const yearDropdown = document.getElementById('year');
+    yearDropdown.innerHTML = '';
+    yearDropdown.disabled = false;
+
+    if (availableYears.length === 0) {
+        yearDropdown.disabled = true;
+        yearDropdown.innerHTML = '<option>No data available</option>';
+    }
+    availableYears.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.innerText = year;
+        if (selectedYear === year) {
+            option.selected = true;
+        }
+        yearDropdown.appendChild(option);
+    });
+}
