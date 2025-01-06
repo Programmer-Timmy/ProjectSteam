@@ -29,6 +29,7 @@ urlpatterns = [
     path('ajax/', include('ajax.urls')),
     path('account/', include('account.urls')),
     path('raspberry/', include('raspberry.urls')),
+    path('auth/', include('social_django.urls', namespace='social')),  # Include social auth URLs
 ]
 
 if settings.DEBUG:

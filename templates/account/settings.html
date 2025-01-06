@@ -2,15 +2,16 @@
 
 {% block content %}
     <div class="container">
-    <div class="row align-items-center">
-        <div class="col-4"></div>
-        <div class="col-4">
-                    <h1 class="text-center mb-4">User Settings</h1>
+        <div class="row align-items-center">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <h1 class="text-center mb-4">User Settings</h1>
+            </div>
+            <div class="col-4 text-end">
+                <a href="{% url 'account:profile' %}" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Back to
+                    Profile</a>
+            </div>
         </div>
-        <div class="col-4 text-end">
-            <a href="{% url 'account:profile' %}" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Back to Profile</a>
-        </div>
-    </div>
 
         {% if success_message %}
             <div class="alert alert-success alert-dismissible fade show">
@@ -27,13 +28,20 @@
 
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                        <div class="alert alert-danger mt-2">
-                            {% for error in form.username.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
+                    {% if user.use_steam_profile %}
+                        <input type="text" class="form-control" id="username" value="{{ user.steam_username }}"
+                               disabled>
+                        <input type="hidden" name="username" value="{{ user.original_username }}">
+                    {% else %}
+
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
 
@@ -74,8 +82,17 @@
                 </div>
                 <div class="form-group">
                     <label for="api_key" class="form-label">API Key</label>
-                    <p class="form-control-plaintext">{{ user.api_key }}</p>
+                    <input type="text" class="form-control" id="api_key" value="{{ user.api_key }}" disabled>
                 </div>
+
+                {% if user.steam_id %}
+                    <div class="form-check form-switch mt-2">
+                        {{ form.use_steam_profile }}
+                        <label class="form-check-label" for="use_steam_profile">
+                            Use the steam profile name as your username and profile picture
+                        </label>
+                    </div>
+                {% endif %}
 
                 <div class="form-check form-switch mt-2">
                     {{ form.opt_out }}
@@ -92,7 +109,23 @@
                             {% endfor %}
                         </div>
                     {% endif %}
+                </div>
 
+                <div class="form-check form-switch mt-2">
+                    {{ form.steam_opt_out }}
+                    <label class="form-check-label" for="public_profile">
+                        Opt out of sharing your steam data for dashboard analytics
+                    </label>
+                    <small class="form-text text-muted">
+                        By opting out, your steam activity data will not contribute to the dashboard statistics.
+                    </small>
+                    {% if form.steam_opt_out.errors %}
+                        <div class="alert alert-danger mt-2">
+                            {% for error in form.steam_opt_out.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
                 <div class="form-group mt-3">
@@ -148,11 +181,21 @@
                 </div>
             </form>
         </div>
-{#        delete account#}
+        {#        delete account#}
         <div class="card p-4 shadow my-4 bg-light">
             <h3 class="card-title mb-4">Delete Account</h3>
             <a href="{% url 'account:delete' %}" class="btn btn-danger w-100">Delete Account</a>
         </div>
+
+        {% if user.steam_id %}
+            <div class="card p-4 shadow my-4 bg-light">
+                <h3 class="card-title mb-2">Steam Account</h3>
+                <p class="text-muted mb-2">You have connected your steam account to this account. You can disconnect it
+                    here.
+                </p>
+                <a href="{% url 'disconnect_steam' %}" class="btn btn-danger w-100">Disconnect Steam Account</a>
+            </div>
+        {% endif %}
     </div>
 
 {% endblock %}

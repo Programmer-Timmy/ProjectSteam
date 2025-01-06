@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="display-4 fw-bold ">Connect Your Steam Account</h1>
+    <p class="lead text-muted mt-3">
+        You need to create an account before linking your Steam profile.<br>
+        If you already have an account, you can login.
+    </p>
+    <div class="mt-4">
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg me-3">
+            Create Account
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-secondary btn-lg">
+            Login
+        </a>
+    </div>
+    <div class="mt-5">
+        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/753/header.jpg"
+             alt="Steam Banner"
+             class="img-fluid rounded shadow">
+    </div>
+</div>
+{% endblock %}

@@ -9,10 +9,12 @@
                     <!-- Profile Picture -->
                     <div class="col-auto">
                         <img src="
-                        {% if user.profile_picture %}
-                                {{ user.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
+                        {% if user.use_steam_profile and user.avatar_url %}
+                            {{ user.avatar_url }}
+                        {% elif img_exist and user.profile_picture %}
+                            {{ user.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                         {% else %}
-                                /media/profile_pictures/default-profile.png
+                            /media/profile_pictures/default-profile.png
                         {% endif %}
                         "
                              alt="{{ user.username }}"
@@ -23,10 +25,21 @@
                         <h1 class="fw-bold">{{ user.username }}</h1>
                         <p class="mb-0">Member Since: {{ user.created_at|date:"F j, Y" }}</p>
                     </div>
+                <!-- social media links -->
+                    <div class="col-auto text-end">
+                        {% if not user.steam_opt_out and user.steam_id %}
+                            <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}"
+                               class="p-2">
+                                <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30" width="30">
+                            </a>
+                        {% endif %}
+                    </div>
                     <!-- Profile Status -->
                     <div class="col-auto text-end d-flex flex-column">
                         {% if user.opt_out %}
                             <span class="badge bg-danger">Opted Out</span>
+                        {% elif not user.steam_id %}
+                            <span class="badge bg-danger">No Steam Account</span>
                         {% elif user.public_profile %}
                             <span class="badge bg-success">Public Profile</span>
                         {% else %}
@@ -49,7 +62,7 @@
 
     <div class="container my-4">
 
-        {% if user.opt_out %}
+        {% if user.opt_out%}
             <div class="alert alert-danger text-center" role="alert">
                 <div class="row">
                     <div class="col-4"></div>
@@ -70,6 +83,27 @@
                     Update Settings
                 </a>
             </div>
+        {% elif not user.steam_id %}
+
+            <div class="alert alert-warning text-center" role="alert">
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Connect Your Steam Account</h2>
+                    </div>
+                    <div class="col-4 text end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    To use your personal steam dashboard, you need to connect your Steam account. <br>
+                    If you don't want to connect your Steam account, you can still use the dashboard with limited features.
+                </p>
+                <a href="{% url 'social:begin' 'steam' %}" class="btn btn-primary">
+                    Connect Steam
+                </a>
+            </div>
+
         {% else %}
             <div class="row g-4">
                 <!-- Last Played Games Section -->
@@ -109,7 +143,9 @@
                                             <div class="col-md-4 col-lg-2">
                                                 <div class="card shadow h-100 border-0 bg-dark text-white">
                                                     <img src="
-                                                {% if friend.friend.profile_picture %}
+                                                {% if friend.friend.use_steam_profile and friend.friend.avatar_url %}
+                                                    {{ friend.friend.avatar_url }}
+                                                {% elif friend.friend.profile_picture and friend.friend.profile_picture.url %}
                                                     {{ friend.friend.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                                                 {% else %}
                                                     /media/profile_pictures/default-profile.png
