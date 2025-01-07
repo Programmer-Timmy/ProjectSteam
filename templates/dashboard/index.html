@@ -293,13 +293,13 @@
     <div class="bg-light-subtle px-5 mt-5 py-3">
         <div class="row">
             <div class="col-12 pb-5">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between flex-column flex-md-row align-items-center mb-md-0 mb-3">
                     <h2>Explore Interactive Apps and Games</h2>
                     <a href="{% url 'playable_games:games-index' %}" class="btn btn-primary btn-sm">View All</a>
                 </div>
                 <div class="row flex-nowrap overflow-auto">
                     {% for app in playable_games %}
-                        <div class="col-4 col-md-3">
+                        <div class="col-12 col-md-6 col-lg-3">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if app.image_url %}
                                     <img src="{{ app.image_url }}" class="card-img-top object-fit-cover"
@@ -340,7 +340,7 @@
                 <div class="row flex-nowrap overflow-auto">
 
                     {% for game in top_10_games %}
-                        <div class="col-4">
+                        <div class="col-md-6 col-lg-4 col-12">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if game.steam_image %}
                                     <div class="img-wrapper position-relative">
@@ -390,7 +390,7 @@
                     <div class="row flex-nowrap overflow-auto">
 
                         {% for game in best_reviewed_games %}
-                            <div class="col-4">
+                            <div class="col-md-6 col-lg-4 col-12">
                                 <div class="card mb-4 shadow-sm h-100">
                                     {% if game.steam_image %}
                                         <div class="img-wrapper position-relative">

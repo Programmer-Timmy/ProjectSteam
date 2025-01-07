@@ -4,10 +4,12 @@ import importlib
 def get_playable_games():
     IMAGES = {
         'satisfactory_api': 'https://portfolio.timmygamer.nl/img/66fe973b40b0f7.53385927.jpg',
+        'hangman': 'https://t4.ftcdn.net/jpg/02/62/24/45/360_F_262244537_RjHfRBucxPyo7o6QetIAQYpd5O3h6cEN.jpg',
     }
 
     DESCRIPTIONS = {
         'satisfactory_api': 'A place to manage your Satisfactory servers.',
+        'hangman': 'A classic word guessing game.',
     }
 
     module = importlib.import_module('games.playable_games.urls')

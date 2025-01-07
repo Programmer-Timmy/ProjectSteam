@@ -9,5 +9,6 @@ app_name = 'playable_games'
 urlpatterns = [
     path("", views.index, name="games-index"),
     path("satisfactory_api/", include('games.playable_games.satisfactory_api.urls'), name="satisfactory_api"),
+    path("hangman/", include('games.playable_games.hangman.urls'), name="hangman"),
 
 ]
