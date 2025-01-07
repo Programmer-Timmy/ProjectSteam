@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Query users
         self.stdout.write("Fetching data from Steam API...")
-        users = User.objects.filter(steam_id__isnull=False, steam_opt_out=False)
+        users = User.objects.filter(steam_id__isnull=False, steam_opt_out=False, opt_out=False)
 
         if not users.exists():
             self.stdout.write(self.style.WARNING("No users found with the specified criteria."))
