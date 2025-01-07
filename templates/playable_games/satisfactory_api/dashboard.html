@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     <div class="container mt-2 pb-5">
@@ -99,139 +100,15 @@
             </div>
         </div>
     </div>
+    <script>
+    const server_id = {{ id }};
+    const csrftoken = '{{ csrf_token|safe }}';
+    </script>
     {% include 'modals/message_modal.html' %}
     {% include 'modals/satisfactory_api_shutdown.html' %}
     {% include 'modals/satisfactory_api_advanced_game_settings.html' %}
     {% include 'modals/satisfactory_api_server_options.html' %}
     {% include 'modals/satisfactory_api_download.html' %}
-    <style>
-        .outside-blink {
-            position: relative;
-            display: inline-block;
-            color: #fff; /* Text color */
-            font-size: 24px; /* Adjust as needed */
-            font-weight: bold; /* Ensure visibility */
-        }
+    <script src="{% static 'js/satisfactoryApi/base.js' %}"></script>
 
-        .outside-blink::before {
-            border-radius: 50%; /* Circle */
-            content: "";
-            position: absolute;
-            top: -0px;
-            left: -0px;
-            right: -0px;
-            bottom: -0px;
-        }
-
-        .online.outside-blink::before {
-            animation: blink-online 3s infinite;
-        }
-
-        .offline.outside-blink::before {
-            animation: blink-offline 3s infinite;
-        }
-
-        @keyframes blink-online {
-            0% {
-                opacity: 1;
-                box-shadow: 0 0 10px 5px rgba(25, 135, 84, 0.5);
-            }
-            45% {
-                opacity: 0;
-                box-shadow: 0 0 20px 10px rgba(25, 135, 84, 0.2);
-            }
-            90% {
-                opacity: 0;
-                box-shadow: none;
-            }
-            100% {
-                opacity: 1;
-                box-shadow: none;
-            }
-        }
-
-        @keyframes blink-offline {
-            0% {
-                opacity: 1;
-                box-shadow: 0 0 10px 5px rgba(220, 53, 69, 0.5);
-            }
-            45% {
-                opacity: 0;
-                box-shadow: 0 0 20px 10px rgba(220, 53, 69, 0.2);
-            }
-            90% {
-                opacity: 0;
-                box-shadow: none;
-            }
-            100% {
-                opacity: 1;
-                box-shadow: none;
-            }
-        }
-    </style>
-
-    <script>
-        {#    evrey 1 minuit get new data#}
-
-        function updateServerData() {
-            $.get('{% url 'playable_games:satisfactory_api:get_server_info' id %}', function (data) {
-                const serverData = data.server_data;
-                const serverOptions = data.serverOptions;
-                const advancedGameSettings = data.advancedGameSettings;
-                const saveGames = data.saveGames;
-
-                const online = data.online;
-                const onlineElement = $('#online');
-                const offlineElement = $('#offline');
-                const serverButtons = $('#server_buttons button');
-
-                if (online) {
-                    onlineElement.removeClass('d-none');
-                    offlineElement.addClass('d-none');
-                    serverButtons.attr('disabled', false);
-                } else {
-                    onlineElement.addClass('d-none');
-                    offlineElement.removeClass('d-none');
-                    serverButtons.attr('disabled', true);
-                }
-
-                if (serverData === null) {
-                    return;
-                }
-                $('#server_data').html(`
-                    <dt class="col-sm-4">Active Save Game:</dt>
-                    <dd class="col-sm-8">${serverData.activeSessionName}</dd>
-
-                    <dt class="col-sm-4">Player Count:</dt>
-                    <dd class="col-sm-8">${serverData.numConnectedPlayers} / ${serverData.playerLimit}</dd>
-
-                    <dt class="col-sm-4">Tier:</dt>
-                    <dd class="col-sm-8">${serverData.techTier}</dd>
-
-                    <dt class="col-sm-4">Game Phase:</dt>
-                    <dd class="col-sm-8">${serverData.gamePhase}</dd>
-
-                    <dt class="col-sm-4">Is Game Running:</dt>
-                    <dd class="col-sm-8">
-                        ${serverData.isGamePaused ? '<span class="text-danger">No</span>' : '<span class="text-success">Yes</span>'}
-                    </dd>
-
-                    <dt class="col-sm-4">Total Duration:</dt>
-                    <dd class="col-sm-8">${serverData.totalGameDuration}</dd>
-
-                    <dt class="col-sm-4">Tick Rate:</dt>
-                    <dd class="col-sm-8">${serverData.averageTickRate} ticks/s</dd>
-                `);
-
-                updateSaveGames(saveGames);
-                updateServerOptions(serverOptions);
-                updateAdvancedGameSettings(advancedGameSettings);
-            });
-        }
-
-        $(document).ready(function () {
-            setInterval(updateServerData, 60000);
-        });
-
-    </script>
 {% endblock %}
