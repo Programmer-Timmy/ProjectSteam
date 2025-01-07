@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 from steam_web_api import Steam
-
+import pytz
 from AuthManager.models import CustomUser
 from account.models import Friend
 from controlers.api.SteamApi import SteamApi
@@ -72,10 +72,18 @@ class UserManager:
             Aggregated game data grouped by app ID.
         -------
         """
+        netherlands_tz = pytz.timezone('Europe/Amsterdam')  # Netherlands time zone
+        pacific_tz = pytz.timezone('US/Pacific')  # Pacific Time zone
+
+        now_nl = timezone.localtime(timezone.now(), netherlands_tz)
+        now_pt = now_nl.astimezone(pacific_tz)
+
+        two_weeks_ago_pt = now_pt - timedelta(weeks=2)
+
         return (
             GameSessions.objects.filter(
                 user_game__user=user,
-                start_timestamp__gte=timezone.now() - timedelta(weeks=2)
+                start_timestamp__gte=two_weeks_ago_pt
             )
             .values('user_game__app__appid')
             .annotate(total_time=Sum('total_time'))
@@ -112,6 +120,7 @@ class UserManager:
         -------
         """
         for game in games:
+            print(f"Processing game: {game['name']}")
             self._add_game_to_db_if_missing(game)
             self._add_game_to_user_if_missing(game, user)
             self._update_game_sessions(game, user, last_played_games_in_db)
@@ -181,8 +190,11 @@ class UserManager:
         game_in_db = last_played_games_in_db.filter(user_game__app__appid=game['appid']).first()
 
         if game_in_db:
+            print(round(game['playtime_2weeks'] / 60, 2))
+            print(game_in_db['total_time'])
             game['playtime_2weeks'] = round(game['playtime_2weeks'] / 60, 2)
             remaining_time = round(max(0, (game['playtime_2weeks'] - game_in_db['total_time'])), 2)
+            print(f"Remaining time for {game['name']}: {remaining_time}")
 
             if remaining_time > 0:
                 GameSessions.objects.create(
