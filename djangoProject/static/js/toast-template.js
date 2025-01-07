@@ -1,3 +1,5 @@
+//Creates a toast with a message. Toast gets a custom color depending on the type.
+
 export function getToCloseToast(message, type) {
     return `
         <div class="toast" id="ToCloseToast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
