@@ -41,18 +41,19 @@ class UserManager:
         user_friends = SteamApi().fetch_steam_user_friends(user.steam_id)
         last_played_games_in_db = self._get_last_played_games(user)
         recently_played_games = SteamApi().fetch_steam_recently_played_games(user.steam_id)
+        print(recently_played_games)
 
-        if recently_played_games:
+        if recently_played_games and len(recently_played_games['response']) > 0:
             self._process_recent_games(recently_played_games['response']['games'], user, last_played_games_in_db)
         else:
             self._handle_api_error(user)
 
-        if user_games:
-            self._update_user_games(user, user_games)
+        if user_games and len(user_games['response']) > 0:
+                self._update_user_games(user, user_games)
         else:
             self._handle_api_error(user)
 
-        if user_friends:
+        if user_friends and len(user_friends['friendslist']) > 0:
             self._update_user_friends(user, user_friends)
         else:
             self._handle_api_error(user)
