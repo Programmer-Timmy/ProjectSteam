@@ -30,14 +30,7 @@
 {# Navbar #}
 {% include 'nav.html' %}
 
-{# Page Content #}
-{% block content %}{% endblock %}
-    <div class="test">
-        {{ user.has_raspberry }}
-    </div>
-    <script>
-        const hasRaspberry = {{user.has_raspberry|yesno:"true,false"}};
-    </script>
+
 
 
 {# Footer #}
