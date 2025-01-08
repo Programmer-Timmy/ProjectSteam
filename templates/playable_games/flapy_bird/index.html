@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% block style %}
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #87CEEB; /* Sky blue background */
+        }
+
+        canvas {
+            display: block; /* Remove inline gaps for the canvas */
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #start-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .button {
+            font-size: 20px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            background-color: white;
+            color: black;
+        }
+
+        #death-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            text-align: center;
+            color: black;
+        }
+
+        nav {
+            z-index: 2;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="game-area">
+        <div id="start-screen">
+            <button id="start-button" class="button">Start Game</button>
+        </div>
+        <div id="death-screen" style="display: none">
+            <h1>Game Over!</h1>
+            <h2>Your score: <span id="score"></span></h2>
+            <button id="restart-button" class="button">Restart Game</button>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+    <script>
+        var myGamePiece;
+        var myObstacles = [];
+        var myScore;
+        var speed = 2;
+
+        /**
+         * Starts the game
+         */
+        function startGame() {
+            myGamePiece = new component(80, 80, "yellow", 10, 120, "image", "/media/flappy_bird/flappy.png");
+            myGamePiece.gravity = 0.1;
+            myScore = new component("30px", "Consolas", "black", 10, 40, "text");
+
+            $("#start-button").click(function () {
+                console.log("Game started");
+                $(this).parent().hide();
+                myGameArea.start();
+            });
+        }
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = document.body.clientWidth;
+                this.canvas.height = document.body.clientHeight - 56;
+                this.canvas.style.paddingTop = "56px";
+                this.context = this.canvas.getContext("2d");
+                document.getElementById("game-area").insertBefore(this.canvas, document.getElementById("game-area").childNodes[0]);
+                this.frameNo = 0;
+                this.interval = setInterval(updateGameArea, 20);
+                this.canvas.addEventListener("click", jump);
+            },
+            restart: function () {
+                {#    reloda the page#}
+                location.reload();
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
+            stop: function () {
+                clearInterval(this.interval);
+                showDeathScreen();
+            }
+        };
+
+        /**
+         * Represents a game component
+         * @param width
+         * @param height
+         * @param color
+         * @param x
+         * @param y
+         * @param type
+         * @param imageSrc
+         * @constructor
+         */
+        function component(width, height, color, x, y, type, imageSrc) {
+            this.type = type;
+            this.image = null;
+            this.score = 0;
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.speedY = 0;
+            this.x = x;
+            this.y = y;
+            this.gravity = 0;
+            this.gravitySpeed = 0;
+
+            /**
+             * Updates the component
+             */
+            this.update = function () {
+                ctx = myGameArea.context;
+                if (this.type == "image") {
+                    if (!this.image) {
+                        this.image = new Image();
+                        this.image.src = imageSrc;
+
+                        this.image.onload = () => {
+                            const aspectRatio = this.image.width / this.image.height;
+                            if (this.width && !this.height) {
+                                this.height = this.width / aspectRatio;
+                            } else if (this.height && !this.width) {
+                                this.width = this.height * aspectRatio;
+                            }
+                        };
+                    }
+
+                    if (this.image.complete) {
+                        let targetAngle = 0;
+                        if (this.gravitySpeed < 0) {
+                            targetAngle = -20;
+                        } else if (this.gravitySpeed > 0) {
+                            targetAngle = 15;
+                        }
+
+                        this.angle = this.angle || 0;
+                        const smoothingFactor = 0.15;
+                        this.angle += (targetAngle - this.angle) * smoothingFactor;
+
+                        ctx.save();
+                        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                        ctx.rotate(this.angle * Math.PI / 180);
+                        ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+                        ctx.restore();
+                    }
+                } else if (this.type == "text") {
+                    ctx.font = this.width + " " + this.height;
+                    ctx.fillStyle = color;
+                    ctx.fillText(this.text, this.x, this.y);
+                } else {
+                    ctx.fillStyle = color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            };
+
+            /**
+             * Updates the position of the component
+             */
+            this.newPos = function () {
+                this.gravitySpeed += this.gravity;
+                this.y += this.speedY + this.gravitySpeed;
+                this.hitEdges();
+            };
+
+            /**
+             * Checks if the component is hitting the edges of the game area
+             */
+            this.hitEdges = function () {
+                if (this.y < 0 || this.y > myGameArea.canvas.height - this.height) {
+                    myGameArea.stop();
+                }
+            };
+
+            /**
+             * Checks if the component is colliding with another object
+             * @param otherobj
+             * @returns {boolean}
+             */
+            this.crashWith = function (otherobj) {
+                var myleft = this.x;
+                var myright = this.x + this.width;
+                var mytop = this.y;
+                var mybottom = this.y + this.height;
+
+                var otherleft = otherobj.x;
+                var otherright = otherobj.x + otherobj.width;
+                var othertop = otherobj.y;
+                var otherbottom = otherobj.y + otherobj.height;
+
+                if (myright > otherleft && myleft < otherright && mybottom > othertop && mytop < otherbottom) {
+                    var collision = false;
+
+                    var myImageData = myGameArea.context.getImageData(this.x, this.y, this.width, this.height);
+                    var otherImageData = myGameArea.context.getImageData(otherobj.x, otherobj.y, otherobj.width, otherobj.height);
+
+                    for (var i = 0; i < myImageData.data.length; i += 4) {
+                        if (myImageData.data[i + 3] !== 0) { // Non-transparent pixel in my image
+                            var x = (i / 4) % this.width;
+                            var y = Math.floor((i / 4) / this.width);
+                            var otherIndex = ((y + (otherobj.y - otherobj.y)) * otherobj.width + (x + (otherobj.x - otherobj.x))) * 4;
+
+                            if (otherImageData.data[otherIndex + 3] !== 0) {
+                                collision = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    return collision;
+                }
+
+                return false;
+            };
+        }
+
+        /**
+         * Updates the game area
+         */
+        function updateGameArea() {
+            for (i = 0; i < myObstacles.length; i++) {
+                if (myGamePiece.crashWith(myObstacles[i])) {
+                    myGameArea.stop();
+                    return;
+                }
+            }
+            myGameArea.clear();
+            myGameArea.frameNo += 1;
+            if (myGameArea.frameNo == 1 || everyinterval(300)) {
+                var x = myGameArea.canvas.width;
+                var minHeight = myGameArea.canvas.height / 6;
+                var maxHeight = myGameArea.canvas.height / 2 * 1.3;
+                var height = Math.floor(Math.random() * (maxHeight - minHeight + 1) + minHeight);
+                var width = 200;
+                var gap = 200; // Fixed gap for simplicity
+                myObstacles.push(new component(width, height, "green", x, 0, "image", "/media/flappy_bird/pipeNorth.png"));
+                myObstacles.push(new component(width, myGameArea.canvas.height - height - gap, "green", x, height + gap, "image", "/media/flappy_bird/pipeSouth.png"));
+            }
+            for (i = 0; i < myObstacles.length; i++) {
+                myObstacles[i].x -= speed; // Keep speed constant
+                myObstacles[i].update();
+            }
+            myScore.text = "SCORE: " + myGameArea.frameNo;
+            myScore.update();
+            myGamePiece.newPos();
+            myGamePiece.update();
+        }
+
+        function everyinterval(n) {
+            return (myGameArea.frameNo / n) % 1 === 0;
+        }
+
+        function jump() {
+            myGamePiece.gravitySpeed = -2.5; // Simulate a jump
+        }
+
+        $(document).keydown(function (e) {
+            if (e.keyCode === 32) { // Space key
+                jump();
+            }
+        });
+
+        /**
+         * shows the death screen
+         */
+        function showDeathScreen() {
+            $("#death-screen").show();
+            $("#score").text(myGameArea.frameNo);
+            const $canvas = $("canvas")
+            $canvas.css("filter", "blur(5px)");
+
+            $("#restart-button").click(function () {
+                $canvas.css("filter", "none");
+                $(this).parent().hide();
+                myGameArea.restart();
+            });
+        }
+
+        $(document).ready(function () {
+            startGame();
+        });
+    </script>
+{% endblock %}
+

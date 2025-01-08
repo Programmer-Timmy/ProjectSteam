@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container mt-2 pb-5">
+        <div class="row text-end items align-items-end mb-4">
+            <div class="col-md-3"></div>
+            <div class="col-md-6">
+                <div class="text-center">
+                    <h1 class="display-4">Satisfactory API</h1>
+                    <p class="lead text-muted m-0">See your factory's dedicated server status and more.</p>
+                </div>
+
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'playable_games:satisfactory_api:index' %}" class="btn btn-outline-primary"><i
+                        class="bi bi-arrow-left"></i> Go Back</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Server Status -->
+            <div class="col-md-3">
+                <div class="card shadow-sm bg-dark border-dark shadow-sm">
+                    <div class="card-body text-center">
+                        <div id="online" class="d-flex align-items-center {% if not online %}d-none{% endif %}">
+                            <div class="online rounded-circle bg-success text-white d-flex justify-content-center align-items-center outside-blink"
+                                 style="width: 60px; height: 60px;">
+                            </div>
+                            <h5 class="card-title text-success ms-3 mb-0">Online</h5>
+                        </div>
+                        <div id="offline" class="d-flex align-items-center {% if online %}d-none{% endif %}">
+                            <div class="offline rounded-circle bg-danger text-white d-flex justify-content-center align-items-center outside-blink"
+                                 style="width: 60px; height: 60px;">
+                            </div>
+                            <h5 class="card-title text-danger ms-3 mb-0">Offline</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow-sm bg-dark border-dark shadow-sm mt-4">
+                    <div class="card-body" id="server_buttons">
+                        <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                data-bs-target="#downloadModal" {% if not online %}disabled{% endif %}>
+                            Download Save Game
+                        </button>
+                        <button type="button" class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#advancedGameSettingsModal" {% if not online %}disabled{% endif %}>
+                            Advanced Game Settings
+                        </button>
+                        <button type="button" class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#serverOptionsModal" {% if not online %}disabled{% endif %}>
+                            Change Settings
+                        </button>
+                        <button type="button" class="btn btn-danger w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#shutdownModal" {% if not online %}disabled{% endif %}>
+                            Shutdown Server
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server Information -->
+            <div class="col-md-9">
+                <div class="card shadow-sm bg-dark border-dark text-light h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">Dedicated Server Information</h5>
+                        <dl class="row">
+                            <dt class="col-sm-4">Active Save Game:</dt>
+                            <dd class="col-sm-8">{{ server_data.activeSessionName }}</dd>
+
+                            <dt class="col-sm-4">Player Count:</dt>
+                            <dd class="col-sm-8">{{ server_data.numConnectedPlayers }}
+                                / {{ server_data.playerLimit }}</dd>
+
+                            <dt class="col-sm-4">Tier:</dt>
+                            <dd class="col-sm-8">{{ server_data.techTier }}</dd>
+
+                            <dt class="col-sm-4">Game Phase:</dt>
+                            <dd class="col-sm-8">{{ server_data.gamePhase }}</dd>
+
+                            <dt class="col-sm-4">Is Game Running:</dt>
+                            <dd class="col-sm-8">
+                                {% if server_data.isGamePaused %}
+                                    <span class="text-danger">No</span>
+
+                                {% else %}
+                                    <span class="text-success">Yes</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-4">Total Duration:</dt>
+                            <dd class="col-sm-8">{{ server_data.totalGameDuration }}</dd>
+
+                            <dt class="col-sm-4">Tick Rate:</dt>
+                            <dd class="col-sm-8">{{ server_data.averageTickRate }} ticks/s</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    const server_id = {{ id }};
+    const csrftoken = '{{ csrf_token|safe }}';
+    </script>
+    {% include 'modals/message_modal.html' %}
+    {% include 'modals/satisfactory_api_shutdown.html' %}
+    {% include 'modals/satisfactory_api_advanced_game_settings.html' %}
+    {% include 'modals/satisfactory_api_server_options.html' %}
+    {% include 'modals/satisfactory_api_download.html' %}
+    <script src="{% static 'js/satisfactoryApi/base.js' %}"></script>
+
+{% endblock %}

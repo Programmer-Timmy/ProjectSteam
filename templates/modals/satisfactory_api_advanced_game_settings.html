@@ -1,0 +1,74 @@
+{% load static %}
+<div class="modal fade" id="advancedGameSettingsModal" tabindex="-1" aria-labelledby="advancedGameSettings"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="advancedGameSettings">Edit advanced game settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% for value in advancedGameSettings %}
+                        {% if value.input_type == 'checkbox' %}
+                            <div class="mb-1">
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="{{ value.key }}"
+                                           name="{{ value.key }}"
+                                           {% if value.value == 'True' %}checked{% endif %}>
+                                    <label class="form-check-label" for="{{ value.key }}">{{ value.name }}</label>
+                                </div>
+                                <div id="{{ value.key }}HelpBlock" class="form-text m-0">
+                                    {{ value.description }}
+                                </div>
+                            </div>
+
+                        {% elif value.input_type == 'time' %}
+                            <div class="mb-3">
+                                <label for="{{ value.key }}" class="form-label">{{ value.name }}</label>
+                                <input type="time" class="form-control" id="{{ value.key }}" name="{{ value.key }}"
+                                       value="{{ value.value|default:'00:00' }}">
+                                <div id="{{ value.key }}HelpBlock" class="form-text">
+                                    {{ value.description }}
+                                </div>
+                            </div>
+
+                        {% elif value.input_type == 'range' %}
+                            <div class="mb-3">
+                                <label for="{{ value.key }}" class="form-label">{{ value.name }}</label>
+                                <input type="range" class="form-range" id="{{ value.key }}" name="{{ value.key }}"
+                                       value="{{ value.value }}" min="{{ value.min }}" max="{{ value.max }}"
+                                       step="{{ value.step }}">
+                                <div id="{{ value.key }}HelpBlock" class="form-text m-0">
+                                    {{ value.description }}
+                                </div>
+
+                            </div>
+                        {% else %}
+                            <div class="mb-3">
+                                <label for="{{ value.key }}" class="form-label">{{ value.name }}</label>
+                                <input type="number" class="form-control" id="{{ value.key }}" name="{{ value.key }}"
+                                       value="{{ value.value }}" min="{{ value.min }}" max="{{ value.max }}"
+                                       step="{{ value.step }}">
+                                <div id="{{ value.key }}HelpBlock" class="form-text">
+                                    {{ value.description }}
+                                </div>
+
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer p-2">
+                    <button type="submit" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span id="button-text">Save</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/satisfactoryApi/advancedGameSettings.js' %}"></script>

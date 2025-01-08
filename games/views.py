@@ -1,3 +1,6 @@
+import os
+
+from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 
@@ -75,3 +78,7 @@ def game(request, game_id):
         'search': search,
         'limit': limit
     })
+
+
+
+

@@ -10,8 +10,8 @@
                     <!-- Profile Picture -->
                     <div class="col-auto">
                         <img src="
-                        {% if user_profile.use_steam_profile %}
-                            {{ account_user.avatar_url }}
+                        {% if user.use_steam_profile and user_profile.use_steam_profile %}
+                            {{ user_profile.avatar_url }}
                         {% elif user_profile.profile_picture and user_profile.profile_picture.url %}
                             {{ user_profile.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
                         {% else %}
@@ -30,9 +30,10 @@
 
                     <div class="col-auto text-end">
                         {% if not user_profile.steam_opt_out and user_profile.steam_id %}
-                            <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}"
-                               class="p-2">
-                                <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30" width="30">
+                            <a href="https://steamcommunity.com/profiles/{{ user_profile.steam_id }}"
+                               class="p-2" target="_blank">
+                                <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30"
+                                     width="30">
                             </a>
                         {% endif %}
                     </div>
@@ -66,7 +67,7 @@
                                         <div class="card-body">
                                             <h5 class="card-title">{{ game.user_game.app.name }}</h5>
                                             <p class="card-text">
-                                                Played {{ game.user_game.last_played|date:"F j, Y" }}</p>
+                                                Played {{ game.start_timestamp|date:"F j, Y" }}</p>
                                             <p class="card-text">Playtime: {{ game.total_time }} hours</p>
                                         </div>
                                     </div>
@@ -74,6 +75,38 @@
                             {% endfor %}
                         {% else %}
                             <p class="text-muted">No recent game activity to display.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card bg-light border-0 p-3 shadow">
+                    <div class="d-flex justify-content-between align-items-center pb-2 ">
+                    <h3>Game Library ({{ user_profile.user_games.count }})</h3>
+                    <a href="{% url 'account:game_library' user_profile.id %}" class="btn btn-outline-dark">View Full Library</a>
+                    </div>
+                    <div class="row g-3">
+                        {% if user_games %}
+                            {% for user_game in user_games %}
+                                <div class="col-md-6 col-lg-2">
+                                    <div class="card shadow h-100 border-0 bg-dark text-white">
+                                        <img src="{{ user_game.app.steam_image }}" class="rounded-top img-fluid"
+                                             alt="{{ user_game.app.name }}">
+                                        <div class="card-body d-flex flex-column justify-content-between">
+                                            <div class="top-part">
+                                                <h5 class="card-title">{{ user_game.app.name }}</h5>
+                                                <p class="card-text">Playtime: {{ user_game.hours_played }} hours</p>
+                                            </div>
+                                            <div class="bottom-part pt-2">
+                                                <a href="{% url 'game' user_game.app.appid %}"
+                                                   class="btn btn-outline-light">View Game</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No games in your library.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -109,6 +142,20 @@
                                         </div>
                                     </div>
                                 {% endif %}
+                            {% endfor %}
+                            {% for friend in steam_friends %}
+                                <div class="col-md-4 col-lg-2">
+                                    <div class="card shadow h-100 border-0 bg-dark text-white">
+                                        <img src="{{ friend.avatar_url }}"
+                                             class="rounded-top img-fluid" alt="{{ friend.friend_name }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title text-truncate">{{ friend.friend_name }}</h5>
+                                            <p class="card-text">Steam Friend</p>
+                                            <a href="https://steamcommunity.com/profiles/{{ friend.steam_id }}"
+                                               class="btn btn-outline-light">View Steam Profile</a>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endfor %}
                         </div>
                     </div>

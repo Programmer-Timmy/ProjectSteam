@@ -20,6 +20,9 @@
                 <li class="nav-item">
                     <a class="nav-link {% if request.path == '/games/' %}active{% endif %}" href="{% url 'games-index' %}">Games</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/games/playable/' %}active{% endif %}" href="{% url 'playable_games:games-index' %}">Play & Use</a>
+                </li>
             </ul>
 
             <!-- Right-aligned items -->
@@ -39,6 +42,7 @@
                             <li><a class="dropdown-item" href="{% url 'register' %}">Register</a></li>
                         {% else %}
                             <li><a class="dropdown-item" href="{% url 'account:profile' %}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'account:game_library' %}">Game Library</a></li>
                             <li><a class="dropdown-item" href="{% url 'account:settings' %}">Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>

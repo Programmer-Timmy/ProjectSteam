@@ -9,10 +9,10 @@
   --bs-btn-secondary-bg: #a1a5b1; /* Muted button background */
   --bs-btn-secondary-border: #8c8f9a; /* Slightly darker border */
 
-    nav {
-        background-color: var(--bs-navbar-bg);
-        color: var(--bs-navbar-color);
-    }
+  nav {
+    background-color: var(--bs-navbar-bg);
+    color: var(--bs-navbar-color);
+  }
 }
 
 /* Steam-Like Dark Theme */
@@ -33,4 +33,72 @@
     background-color: rgb(33 37 41) !important;
   }
 
+  .btn.btn-outline-dark{
+    color: #dcdfe1;
+    border-color: #dcdfe1;
+  }
+}
+
+.outside-blink {
+  position: relative;
+  display: inline-block;
+  color: #fff; /* Text color */
+  font-size: 24px; /* Adjust as needed */
+  font-weight: bold; /* Ensure visibility */
+}
+
+.outside-blink::before {
+  border-radius: 50%; /* Circle */
+  content: "";
+  position: absolute;
+  top: -0px;
+  left: -0px;
+  right: -0px;
+  bottom: -0px;
+}
+
+.online.outside-blink::before {
+  animation: blink-online 3s infinite;
+}
+
+.offline.outside-blink::before {
+  animation: blink-offline 3s infinite;
+}
+
+@keyframes blink-online {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 10px 5px rgba(25, 135, 84, 0.5);
+  }
+  45% {
+    opacity: 0;
+    box-shadow: 0 0 20px 10px rgba(25, 135, 84, 0.2);
+  }
+  90% {
+    opacity: 0;
+    box-shadow: none;
+  }
+  100% {
+    opacity: 1;
+    box-shadow: none;
+  }
+}
+
+@keyframes blink-offline {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 10px 5px rgba(220, 53, 69, 0.5);
+  }
+  45% {
+    opacity: 0;
+    box-shadow: 0 0 20px 10px rgba(220, 53, 69, 0.2);
+  }
+  90% {
+    opacity: 0;
+    box-shadow: none;
+  }
+  100% {
+    opacity: 1;
+    box-shadow: none;
+  }
 }

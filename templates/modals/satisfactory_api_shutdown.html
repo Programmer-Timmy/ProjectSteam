@@ -1,0 +1,33 @@
+{% load static %}
+<!-- Shutdown Modal -->
+<div class="modal fade" id="shutdownModal" tabindex="-1" aria-labelledby="shutdownModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning-subtle text-white">
+                <h5 class="modal-title d-flex align-items-center" id="shutdownModalLabel">
+                    <i class="bi bi-server text-white me-2"></i> Shutdown Server
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="text-danger fw-bold">
+                    Are you sure you want to shut down the Satisfactory dedicated server?
+                </p>
+                <p class="text-muted">
+                    If the server is configured as a service with auto-restart enabled, it will restart automatically.
+                </p>
+                <p class="text-muted">
+                    Ensure all players are notified before shutting down to prevent data loss.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmShutdownButton">
+                    <i class="bi bi-power"></i> Confirm Shutdown
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/satisfactoryApi/shutdownServer.js' %}"></script>

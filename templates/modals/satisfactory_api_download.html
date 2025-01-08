@@ -1,0 +1,32 @@
+{% load static %}
+<div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-light">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title text-success" id="downloadModalLabel">Download Save Game</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="game_session" class="form-label">Game Save to Download</label>
+                        <select class="form-select" id="game_session" name="game_session" required>
+                            <option value="" disabled selected>Select a Game Save</option>
+                            {% for game_session in saveGames %}
+                                <option value="{{ game_session.saveName }}">{{ game_session.saveName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        <span id="button-text">Download</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/satisfactoryApi/downloadSaveGame.js' %}">

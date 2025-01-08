@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block style %}
+    <style>
+        #word {
+            font-size: 2em;
+            letter-spacing: 0.5em;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: green;
+        }
+
+        #wrong-letters {
+            margin-top: 10px;
+            color: red;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+        <div class="container text-center pb-5 pt-3">
+        <h1 class="card-title mb-4">Hangman Game</h1>
+        <p class="card-text mb-5">Guess the word by typing one letter at a time. Can you save the hangman?</p>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-light border-0 shadow">
+                    <div class="card-body">
+                        <img src="/media/hangman/hangman-0.svg" alt="Hangman" id="hangman" class="img-fluid mb-3">
+                        <div id="word" class="fs-4 fw-bold text-center">_ _ _ _ _</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8 mt-4 mt-md-0">
+                <div class="card bg-light border-0 shadow">
+                    <div class="card-body">
+                        <div id="message" class="text-success fw-bold mb-3"></div>
+                        <div id="wrong-letters" class="text-danger mb-3">Wrong letters:</div>
+                        <div class="form-group">
+                            <label for="guess" class="form-label">Enter a letter:</label>
+                            <input type="text" id="guess" maxlength="1" autofocus class="form-control w-100 mx-auto shadow-sm">
+                        </div>
+                        <div class="mt-4">
+                            <button class="btn btn-primary w-100 shadow-sm d-none" onclick="init()" id="restart">Restart Game</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="mt-5">
+            <p class="text-muted">Hangman game by <a href="https://github.com/Programmer-Timmy" target="_blank">Programmer Timmy</a></p>
+        </footer>
+    </div>
+
+
+    <script>
+        async function getRandomWord() {
+            return fetch("https://random-word-api.herokuapp.com/word?length=5")
+                .then(response => response.json())
+                .then(data => data[0]);
+        }
+
+        let word = ""; // Declare word as a global variable
+        const guessedLetters = [];
+        const wrongLetters = [];
+        let remainingLetters = 0;
+
+        const wordElement = document.getElementById("word");
+        const messageElement = document.getElementById("message");
+        const wrongLettersElement = document.getElementById("wrong-letters");
+        const guessInput = document.getElementById("guess");
+        const hangmanParts = document.querySelectorAll(".hangman-part");
+        const restartButton = document.getElementById("restart");
+
+        async function init() {
+            word = await getRandomWord();
+            remainingLetters = word.length;
+            console.log(remainingLetters);
+            guessedLetters.length = 0; // Clear arrays for a new game
+            wrongLetters.length = 0;
+
+            hangmanParts.forEach(part => (part.style.display = "none")); // Reset hangman
+            updateWordDisplay();
+            updateWrongLettersDisplay();
+            messageElement.textContent = ""; // Clear any previous messages
+            guessInput.disabled = false; // Enable input
+            restartButton.classList.add("d-none");
+        }
+
+        const updateWordDisplay = () => {
+            const display = word
+                .split("")
+                .map(letter => (guessedLetters.includes(letter) ? letter : "_"))
+                .join(" ");
+            wordElement.textContent = display;
+        };
+
+        const updateWrongLettersDisplay = () => {
+            wrongLettersElement.textContent = `Wrong letters: ${wrongLetters.join(", ")}`;
+            $("#hangman").attr("src", `/media/hangman/hangman-${wrongLetters.length}.svg`);
+        };
+
+        const checkGameOver = () => {
+            if (remainingLetters === 0) {
+                messageElement.textContent = "Congratulations! You guessed the word!";
+                guessInput.disabled = true;
+            } else if (wrongLetters.length >= 6) {
+                messageElement.textContent = `Game Over! The word was "${word}".`;
+                guessInput.disabled = true;
+                restartButton.classList.remove("d-none");
+            }
+        };
+
+        guessInput.addEventListener("input", () => {
+            const guess = guessInput.value.toLowerCase();
+            guessInput.value = ""; // Clear input field
+
+            if (!guess || guessedLetters.includes(guess) || wrongLetters.includes(guess)) {
+                return; // Ignore invalid or repeated input
+            }
+
+            if (word.includes(guess)) {
+                guessedLetters.push(guess);
+                remainingLetters -= word.split(guess).length - 1; // Count occurrences
+                console.log(remainingLetters);
+            } else {
+                wrongLetters.push(guess);
+            }
+
+            updateWordDisplay();
+            updateWrongLettersDisplay();
+            checkGameOver();
+        });
+
+        // Start the game
+        init();
+    </script>
+{% endblock %}

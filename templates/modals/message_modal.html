@@ -1,0 +1,46 @@
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title d-flex align-items-center" id="messageModalLabel">
+                    <i class="me-2" id="messageModalIcon"></i>
+                    <span class="ms-2" id="messageModalTitle">Message</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p id="messageModalText" class="m-0"></p>
+            </div>
+            <div class="modal-footer p-2">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateMessageModal(type, title, message) {
+        const modalTitle = $('#messageModalTitle');
+        const modalText = $('#messageModalText');
+        const modalIcon = $('#messageModalIcon');
+        const iconClasses = {
+            success: 'bi-check-circle-fill text-success',
+            error: 'bi-exclamation-circle-fill text-danger',
+            info: 'bi-info-circle-fill text-primary',
+            warning: 'bi-exclamation-triangle-fill text-warning',
+        };
+
+        modalIcon.removeClass().addClass(iconClasses[type] || 'bi-info-circle-fill text-primary');
+        modalTitle.text(title);
+        modalText.text(message);
+    }
+
+    function showMessageModal(type, title, message) {
+        updateMessageModal(type, title, message);
+        $('#messageModal').modal('show');
+    }
+
+    function hideMessageModal() {
+        $('#messageModal').modal('hide');
+    }
+</script>

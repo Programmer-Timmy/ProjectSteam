@@ -1,5 +1,5 @@
 from django.db.models import Sum, F, FloatField
-from django.db.models.functions import ExtractWeek, Cast
+from django.db.models.functions import ExtractWeek, Cast, Round
 
 from dashboard.models import GameSessions
 
@@ -11,7 +11,7 @@ def get_total_played_data(year, user_id):
     return list(
         GameSessions.objects.filter(user_game__user__id=user_id, start_timestamp__year=year)
         .values(game_name=F('user_game__app__name'), app_id=F('user_game__app__appid'))
-        .annotate(total_time=Cast(Sum('total_time'), output_field=FloatField()))
+        .annotate(total_time=Cast(Round(Sum('total_time'), 2), output_field=FloatField()))
     )
 
 

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container-fluid p-0 shadow-sm">
+        <!-- Profile Header -->
+        <div class="bg-dark text-white py-5 position-relative">
+            <div class="container position-relative z-1">
+                <div class="row align-items-center">
+                    <!-- Profile Picture -->
+                    <div class="col-auto">
+                        <img src="
+                        {% if user.use_steam_profile and user.avatar_url %}
+                            {{ user.avatar_url }}
+                        {% elif img_exist and user.profile_picture %}
+                            {{ user.profile_picture.url|default:'/media/profile_pictures/default-profile.png' }}
+                        {% else %}
+                            /media/profile_pictures/default-profile.png
+                        {% endif %}
+                        "
+                             alt="{{ user.username }}"
+                             class="rounded-circle border border-light shadow" width="120" height="120">
+                    </div>
+                    <!-- Profile Info -->
+                    <div class="col">
+                        <h1 class="fw-bold">{{ user.username }}</h1>
+                        <p class="mb-0">Member Since: {{ user.created_at|date:"F j, Y" }}</p>
+                    </div>
+                    <!-- social media links -->
+                    <div class="col-auto text-end">
+                        {% if not user.steam_opt_out and user.steam_id %}
+                            <a href="https://steamcommunity.com/profiles/{{ user.steam_id }}"
+                               class="p-2" target="_blank">
+                                <img src="/media/Steam_icon_logo.svg" alt="Steam Login" class="img-fluid" height="30"
+                                     width="30">
+                            </a>
+                        {% endif %}
+                    </div>
+                    <!-- Profile Status -->
+                    <div class="col-auto text-end d-flex flex-column">
+                        {% if user.opt_out %}
+                            <span class="badge bg-danger">Opted Out</span>
+                        {% elif not user.steam_id %}
+                            <span class="badge bg-danger">No Steam Account</span>
+                        {% elif user.public_profile %}
+                            <span class="badge bg-success">Public Profile</span>
+                        {% else %}
+                            <span class="badge bg-danger">Private Profile</span>
+                        {% endif %}
+
+                        {% if user.opt_out and user == request_user %}
+                            <a href="{% url 'account:settings' %}" class="btn btn-outline-light btn-lg mt-2">Update
+                                Settings</a>
+                        {% elif user == request_user %}
+                            <a href="{% url 'account:edit' %}" class="btn btn-outline-light btn-lg mt-2">Edit
+                                Profile</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="container my-4">
+
+        {% if user.opt_out %}
+            <div class="alert alert-danger text-center" role="alert">
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Opted Out</h2>
+                    </div>
+                    <div class="col-4 text-end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    You have opted out of social features and statistics tracking. As a result, your profile is
+                    currently disabled and cannot be accessed or used by you or others.
+
+                    If you wish to reactivate these features, you can update your settings at any time.
+                </p>
+                <a href="{% url 'account:settings' %}" class="btn btn-primary">
+                    Update Settings
+                </a>
+            </div>
+        {% elif not user.steam_id %}
+
+            <div class="alert alert-warning text-center" role="alert">
+                <div class="row">
+                    <div class="col-4"></div>
+                    <div class="col-4">
+                        <h2 class="alert-heading">Connect Your Steam Account</h2>
+                    </div>
+                    <div class="col-4 text end">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    To use your personal steam dashboard, you need to connect your Steam account. <br>
+                    If you don't want to connect your Steam account, you can still use the dashboard with limited
+                    features.
+                </p>
+                <a href="{% url 'social:begin' 'steam' %}" class="btn btn-primary">
+                    Connect Steam
+                </a>
+            </div>
+
+        {% else %}
+            <div class="row pb-4 align-items-center">
+                <div class="col-4"></div>
+                <div class="col-4"><h1 class="text-center">Game Library ({{ userGames.count }})</h1></div>
+                <div class="col-4 text-end"><a href="{% url 'account:profile' %}" class="btn btn-outline-dark">Go
+                    Back</a></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card bg-light border-0 p-3 shadow">
+                        <div class="row g-3">
+                            {% if userGames %}
+                                {% for user_game in userGames %}
+                                    <div class="col-md-6 col-lg-2">
+                                        <div class="card shadow h-100 border-0 bg-dark text-white">
+                                            <img src="{{ user_game.app.steam_image }}" class="rounded-top img-fluid"
+                                                 alt="{{ user_game.app.name }}">
+                                            <div class="card-body d-flex flex-column justify-content-between">
+                                                <div class="top-part">
+                                                    <h5 class="card-title">{{ user_game.app.name }}</h5>
+                                                    <p class="card-text">Playtime: {{ user_game.hours_played_annotation }}
+                                                        hours</p>
+                                                </div>
+                                                <div class="bottom-part pt-2">
+                                                    <a href="{% url 'game' user_game.app.appid %}"
+                                                       class="btn btn-outline-light">View Game</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-muted">No games in your library.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
