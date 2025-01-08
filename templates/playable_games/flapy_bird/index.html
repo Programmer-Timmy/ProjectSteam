@@ -32,6 +32,7 @@
             box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
             cursor: pointer;
             background-color: white;
+            color: black;
         }
 
         #death-screen {
@@ -41,6 +42,7 @@
             transform: translate(-50%, -50%);
             z-index: 1;
             text-align: center;
+            color: black;
         }
 
         nav {
@@ -68,8 +70,11 @@
         var myGamePiece;
         var myObstacles = [];
         var myScore;
-        var speed = 2; // Initial speed for obstacles
+        var speed = 2;
 
+        /**
+         * Starts the game
+         */
         function startGame() {
             myGamePiece = new component(80, 80, "yellow", 10, 120, "image", "/media/flappy_bird/flappy.png");
             myGamePiece.gravity = 0.1;
@@ -92,7 +97,7 @@
                 document.getElementById("game-area").insertBefore(this.canvas, document.getElementById("game-area").childNodes[0]);
                 this.frameNo = 0;
                 this.interval = setInterval(updateGameArea, 20);
-                this.canvas.addEventListener("click", jump); // Mobile friendly input
+                this.canvas.addEventListener("click", jump);
             },
             restart: function () {
                 {#    reloda the page#}
@@ -107,6 +112,17 @@
             }
         };
 
+        /**
+         * Represents a game component
+         * @param width
+         * @param height
+         * @param color
+         * @param x
+         * @param y
+         * @param type
+         * @param imageSrc
+         * @constructor
+         */
         function component(width, height, color, x, y, type, imageSrc) {
             this.type = type;
             this.image = null;
@@ -119,6 +135,10 @@
             this.y = y;
             this.gravity = 0;
             this.gravitySpeed = 0;
+
+            /**
+             * Updates the component
+             */
             this.update = function () {
                 ctx = myGameArea.context;
                 if (this.type == "image") {
@@ -126,7 +146,6 @@
                         this.image = new Image();
                         this.image.src = imageSrc;
 
-                        // Calculate aspect ratio and adjust dimensions
                         this.image.onload = () => {
                             const aspectRatio = this.image.width / this.image.height;
                             if (this.width && !this.height) {
@@ -138,23 +157,22 @@
                     }
 
                     if (this.image.complete) {
-                        // Rotate based on gravity or jump
                         let targetAngle = 0;
                         if (this.gravitySpeed < 0) {
-                            targetAngle = -20; // Bird going up
+                            targetAngle = -20;
                         } else if (this.gravitySpeed > 0) {
-                            targetAngle = 15; // Bird going down
+                            targetAngle = 15;
                         }
 
-                        this.angle = this.angle || 0; // Initialize angle if not already set
-                        const smoothingFactor = 0.15; // Control the smoothness, a smaller value means smoother rotation
+                        this.angle = this.angle || 0;
+                        const smoothingFactor = 0.15;
                         this.angle += (targetAngle - this.angle) * smoothingFactor;
 
-                        ctx.save(); // Save the current state of the canvas
-                        ctx.translate(this.x + this.width / 2, this.y + this.height / 2); // Move the origin to the center of the bird
-                        ctx.rotate(this.angle * Math.PI / 180); // Rotate the canvas
-                        ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height); // Draw the bird centered around the origin
-                        ctx.restore(); // Restore the canvas state to its original state
+                        ctx.save();
+                        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
+                        ctx.rotate(this.angle * Math.PI / 180);
+                        ctx.drawImage(this.image, -this.width / 2, -this.height / 2, this.width, this.height);
+                        ctx.restore();
                     }
                 } else if (this.type == "text") {
                     ctx.font = this.width + " " + this.height;
@@ -165,16 +183,30 @@
                     ctx.fillRect(this.x, this.y, this.width, this.height);
                 }
             };
+
+            /**
+             * Updates the position of the component
+             */
             this.newPos = function () {
                 this.gravitySpeed += this.gravity;
                 this.y += this.speedY + this.gravitySpeed;
                 this.hitEdges();
             };
+
+            /**
+             * Checks if the component is hitting the edges of the game area
+             */
             this.hitEdges = function () {
                 if (this.y < 0 || this.y > myGameArea.canvas.height - this.height) {
                     myGameArea.stop();
                 }
             };
+
+            /**
+             * Checks if the component is colliding with another object
+             * @param otherobj
+             * @returns {boolean}
+             */
             this.crashWith = function (otherobj) {
                 var myleft = this.x;
                 var myright = this.x + this.width;
@@ -212,6 +244,9 @@
             };
         }
 
+        /**
+         * Updates the game area
+         */
         function updateGameArea() {
             for (i = 0; i < myObstacles.length; i++) {
                 if (myGamePiece.crashWith(myObstacles[i])) {
@@ -255,6 +290,9 @@
             }
         });
 
+        /**
+         * shows the death screen
+         */
         function showDeathScreen() {
             $("#death-screen").show();
             $("#score").text(myGameArea.frameNo);

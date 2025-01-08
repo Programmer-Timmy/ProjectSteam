@@ -243,11 +243,10 @@
                     {% else %}
                         <div class="row flex-nowrap overflow-auto">
                             {% for game in last_played_games %}
-                                <div class="col-4 col-xl-2">
+                                <div class="col-lg-4 col-md-6 col-xl-2">
                                     <div class="card mb-4 shadow-sm h-100">
                                         {% if game.user_game.app.steam_image %}
                                             <img src="{{ game.user_game.app.steam_image }}" class="card-img-top"
-                                                 style="max-width: 500px;"
                                                  alt="{{ game.app.name }}">
                                         {% else %}
                                             <p class="text-center text-muted">No image available.</p>
@@ -290,16 +289,16 @@
             </div>
         {% endif %}
     </div>
-    <div class="bg-light-subtle px-5 mt-5 py-3">
+    <div class="bg-light-subtle px-md-5 px-3 mt-5 py-3">
         <div class="row">
             <div class="col-12 pb-5">
                 <div class="d-flex justify-content-between flex-column flex-md-row align-items-center mb-md-0 mb-3">
                     <h2>Explore Interactive Apps and Games</h2>
                     <a href="{% url 'playable_games:games-index' %}" class="btn btn-primary btn-sm">View All</a>
                 </div>
-                <div class="row flex-nowrap overflow-auto">
+                <div class="row flex-nowrap overflow-auto" style="scroll-snap-type: x proximity;">
                     {% for app in playable_games %}
-                        <div class="col-12 col-md-6 col-lg-3">
+                        <div class="col-12 col-md-6 col-lg-3" style="scroll-snap-align: start;">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if app.image_url %}
                                     <img src="{{ app.image_url }}" class="card-img-top object-fit-cover"
@@ -337,10 +336,10 @@
 
             <div class="col-12">
                 <h2>Most played games</h2>
-                <div class="row flex-nowrap overflow-auto">
+                <div class="row flex-nowrap overflow-auto" style="scroll-snap-type: x proximity;">
 
                     {% for game in top_10_games %}
-                        <div class="col-md-6 col-lg-4 col-12">
+                        <div class="col-md-6 col-lg-4 col-12" style="scroll-snap-align: start;">
                             <div class="card mb-4 shadow-sm h-100">
                                 {% if game.steam_image %}
                                     <div class="img-wrapper position-relative">
@@ -387,10 +386,10 @@
                 </div>
                 <div class="col-12 mt-5">
                     <h2>Best reviewed games</h2>
-                    <div class="row flex-nowrap overflow-auto">
+                    <div class="row flex-nowrap overflow-auto" style="scroll-snap-type: x proximity;">
 
                         {% for game in best_reviewed_games %}
-                            <div class="col-md-6 col-lg-4 col-12">
+                            <div class="col-md-6 col-lg-4 col-12" style="scroll-snap-align: start;">
                                 <div class="card mb-4 shadow-sm h-100">
                                     {% if game.steam_image %}
                                         <div class="img-wrapper position-relative">
@@ -440,5 +439,9 @@
     </div>
     {% include 'modals/dashboard_filters.html' %}
     {% include 'modals/dashboard_filters_friend.html' %}
+    <script>
+
+
+    </script>
 {% endblock %}
 

@@ -11874,6 +11874,10 @@ textarea.form-control-lg {
 [data-bs-theme=dark] .card.bg-light {
   background-color: rgb(33, 37, 41) !important;
 }
+[data-bs-theme=dark] .btn.btn-outline-dark {
+  color: #dcdfe1;
+  border-color: #dcdfe1;
+}
 
 .outside-blink {
   position: relative;

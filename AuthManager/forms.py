@@ -61,11 +61,14 @@ class CustomLoginForm(forms.Form):
         username = cleaned_data.get('username')
         password = cleaned_data.get('password')
 
-        # Manually check authentication if needed
         if username and password:
-            user = authenticate(username=username, password=password)
-            if user is None:
+            if not CustomUser.objects.filter(username=username).exists():
                 raise ValidationError("Invalid username or password.")
+
+            user = authenticate(username=username, password=password)
+            if not user:
+                raise ValidationError("Invalid username or password.")
+
 
         return cleaned_data
 

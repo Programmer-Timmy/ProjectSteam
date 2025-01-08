@@ -164,7 +164,8 @@ class UserManager:
             The user object.
         -------
         """
-        if not user.user_games.filter(app__appid=game['appid']).exists():
+        user_game = user.user_games.filter(app__appid=game['appid']).first()
+        if not user_game:
             if self.stdout:
                 self.stdout.write(f"Game: {game['name']} not found in the user's games. Adding it now.")
             user.user_games.create(
@@ -172,6 +173,10 @@ class UserManager:
                 last_played=timezone.now(),
                 hours_played=game['playtime_forever'],
             )
+        else:
+            user_game = user.user_games.get(app__appid=game['appid'])
+            user_game.hours_played = game['playtime_forever']
+            user_game.save()
 
     def _update_game_sessions(self, game, user, last_played_games_in_db):
         """
@@ -228,6 +233,8 @@ class UserManager:
         """
         user.avatar_url = user_data['response']['players'][0]['avatarfull']
         user.steam_username = user_data['response']['players'][0]['personaname']
+        if user.use_steam_profile:
+            user.username = user.original_username
         user.save()
 
 

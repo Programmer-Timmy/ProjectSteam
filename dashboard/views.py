@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models.functions import Round
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.db.models import F, Sum, Count, Prefetch
+from django.db.models import F, Sum, Count, Prefetch, ExpressionWrapper, FloatField
 
 from account.models import Friend
-from dashboard.models import GameSessions
+from dashboard.models import GameSessions, UserGames
 from games.models import Games, GameCategoriesLink
 from games.playable_games.utils import get_playable_games
 from games.utils import get_available_years
@@ -38,7 +39,12 @@ def index(request):
 
     last_played = GameSessions.objects.filter(user_game__user=request.user).order_by('-start_timestamp')[:6]
 
-    total_hours = GameSessions.objects.filter(user_game__user=request.user).aggregate(total=Sum('total_time'))['total']
+    total_hours = UserGames.objects.filter(user=request.user).aggregate(
+        total=ExpressionWrapper(Sum('hours_played') / 60.0 , output_field=FloatField())
+    )['total']
+
+    print(total_hours)
+
     total_playtime = format_time(total_hours)
 
     average_playtime = GameSessions.objects.filter(user_game__user=request.user).aggregate(
