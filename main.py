@@ -1,5 +1,7 @@
 # TODO geef de afstand weer op een lcd scherm of het aantal vrienden.
 #  verstuur de afstand via serial. Geef dit ook weer online
+from time import sleep
+
 import utime
 import neopixel
 import machine
@@ -23,7 +25,6 @@ def neopixel():
     orange = [255, 120, 0]
     minimal_distance = 50
     optimal_distance = 80
-
     # roep de functie measure_distance aan om de afstand op te halen
     distance = measure_distance()
     if distance < minimal_distance:
@@ -35,7 +36,7 @@ def neopixel():
         # berekening voor de hoeveelheid lampen die aangezet moeten worden
         number_of_lit_leds = int(8 - ((distance - minimal_distance) // ((optimal_distance - minimal_distance) / 8)))
         set_neopixel_color(orange, number_of_lit_leds)
-        print("True")
+        print("False")
     else:
         set_neopixel_color(green, 0)
         print("False")
@@ -89,7 +90,6 @@ def measure_distance():
 
 
 while True:
-
     # test_uart_over_usb()
     neopixel()
-    utime.sleep(1)
+    sleep(1)
