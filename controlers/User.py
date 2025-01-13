@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.db.models import Sum
 from django.utils import timezone
 from steam_web_api import Steam
@@ -76,7 +76,7 @@ class UserManager:
         netherlands_tz = pytz.timezone('Europe/Amsterdam')  # Netherlands time zone
         pacific_tz = pytz.timezone('US/Pacific')  # Pacific Time zone
 
-        now_nl = timezone.localtime(timezone.now(), netherlands_tz)
+        now_nl = datetime.now(netherlands_tz)
         now_pt = now_nl.astimezone(pacific_tz)
 
         two_weeks_ago_pt = now_pt - timedelta(weeks=2)
